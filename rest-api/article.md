@@ -2,8 +2,6 @@
 
 Create a custom Sugar endpoint that returns data in the format your app needs.
 
-_Sugar Developers Guide — Month 5 of the customization series_
-
 I asked on LinkedIn which code examples would help Sugar developers. Anand Tupe
 chose REST APIs. I asked whether he wanted to use Sugar’s existing API or build
 new endpoints.
