@@ -1,59 +1,68 @@
 # When Sugar’s REST API Doesn’t Return What You Need
 
-Build a custom SugarApi endpoint with a response your integration can use.
+Create a custom Sugar endpoint that returns data in the format your app needs.
 
 _Sugar Developers Guide — Month 5 of the customization series_
 
-When I asked on LinkedIn which working examples would save Sugar developers time,
-Anand Tupe picked REST APIs. I asked a follow-up: consuming Sugar’s existing API,
-or building custom endpoints?
+I asked on LinkedIn which code examples would help Sugar developers. Anand Tupe
+chose REST APIs. I asked whether he wanted to use Sugar’s existing API or build
+new endpoints.
 
-His answer was specific: building and customizing endpoints when the standard API
-doesn’t provide the output you need. Thanks, Anand. That’s a useful problem to
-build this installment around.
+He wanted to build endpoints when Sugar’s API does not return the output an app
+needs. Thanks, Anand. This post works through that problem from start to finish.
 
-Let’s say an onboarding tool needs an account summary. It expects contact details
-in one object, billing details in another, and a flag telling it whether the
-account has the minimum information for a handoff. Sugar already stores the
-fields. Our job is to define that small contract and enforce the same access
-rules the user should have in Sugar.
+An API (application programming interface) lets one program ask another for data
+or an action. REST (Representational State Transfer) is a common approach to
+building web APIs. An endpoint is one address that an app can call through an API.
 
-**[Get the complete example and installation guide](https://github.com/sugardevelopersguide/sugar-developers-guide-examples/tree/main/rest-api)**
+We will build an endpoint that reads one Account. In Sugar, a module is a group of
+records of one type. The Accounts module holds records for businesses and other
+organizations. Our example uses only fields already in that module.
 
-The repository includes the full endpoint, platform registration, a runnable
-Python client, isolated tests, and an installable topic ZIP. The example uses the standard Accounts module and stock fields, so you can
-follow along in a sandbox without installing a custom module.
+**[Get the code and setup guide](https://github.com/sugardevelopersguide/sugar-developers-guide-examples/tree/main/rest-api)**
 
-## First: do you need a custom endpoint?
+The GitHub repository is a shared folder of example files. It includes the complete
+PHP file, a small Python program to call it,
+an installable ZIP file, and tests. PHP is the language used for this part of
+Sugar. You can try the example in a sandbox—a test copy of Sugar—without adding
+a custom module.
 
-Start with Sugar’s existing API. If you need fewer fields, use field selection.
-If you need a subset of records, use filters. Related-record APIs and bulk
-requests may also cover your requirement. Renaming a few keys in a client is a
-perfectly reasonable option.
+## Check the existing API first
 
-For our Account, the existing single-record endpoint can retrieve `name`,
-`phone_office`, `website`, `billing_address_city`, and `billing_address_country`.
-The companion client’s `--standard` option makes that request so you can compare
-it with the custom response.
+You may not need a new endpoint. Sugar’s built-in API can return selected fields,
+find records that match a condition, and read linked records. Your app can also
+change field names or group the data after it receives a response.
 
-A custom endpoint earns its keep when you want Sugar to own a shared response
-contract or business rule. Here, the handoff rule and nested output belong in one
-place, rather than being reimplemented by every consumer. This is a design
-choice, not a missing ability to retrieve the underlying fields.
+Our example reads five fields: `name`, `phone_office`, `website`,
+`billing_address_city`, and `billing_address_country`. Sugar’s existing API can
+already return all five.
 
-## Define the response before writing PHP
+So why add an endpoint? Suppose several apps need the same account summary. Each
+app expects contact and billing details in separate groups. Each also needs to
+know whether the account has enough data to pass to the next step in a process.
 
-Our new route is a read-only GET:
+We can put that format and rule in Sugar. Then each app gets the same answer.
+This is a choice about where the rule belongs. It is not a limit on Sugar’s
+ability to return the fields.
+
+## Decide what the response should contain
+
+Our endpoint has this address:
 
 ```text
 /rest/v11_27/SDG/Accounts/{record}/summary
 ```
 
-`SDG` gives the example its own route prefix. We leave the stock Accounts routes
-alone. The example uses API v11_27, documented for Sugar 26.1; choose an API
-version supported by your instance.
+The app sends a GET request to this address. GET asks for data; this endpoint does
+not change the Account. `SDG` gives our example a separate name, so it does not
+replace Sugar’s existing Accounts endpoints.
 
-An illustrative response looks like this:
+The `{record}` part is the Account ID. The example uses API version v11_27,
+listed in the Sugar 26.1 guide. Use a version supported by your own Sugar system.
+
+Here is a sample response. It uses JSON (JavaScript Object Notation), a text
+format that programs use to exchange data. The labels on the left name each
+value or group.
 
 ```json
 {
@@ -63,33 +72,42 @@ An illustrative response looks like this:
     "name": "Example Account"
   },
   "contact": {
-    "phone": "+1 202-555-0147",
+    "phone": "+44 20 7946 0123",
     "website": "https://example.com"
   },
-  "billing": { "city": "Portland", "country": "USA" },
+  "billing": { "city": "London", "country": "United Kingdom" },
   "handoff": { "ready": true, "missing_fields": [] }
 }
 ```
 
-The ID is illustrative. You’ll use an existing Account from your sandbox.
+These are made-up values. You will use an Account from your test system.
 
-For this tutorial, “ready” means name, office phone, billing city, and billing
-country are nonblank after trimming. Website is optional. This checks presence;
-it does not establish that a phone number, URL, or address is valid. Replace the
-policy with your own explicit requirements when adapting the example.
+The `handoff` group says whether the Account can pass to the next step. For this
+example, `ready` is true when the name, office phone, billing city, and billing
+country are not blank. Spaces at the start and end do not count as data. Website
+is optional.
 
-The version number describes our response contract, separately from Sugar’s API
-version. If you later make an incompatible change, introduce a new contract and
-migration plan rather than silently changing what existing clients receive.
+This is a simple check for missing data. It does not check whether a phone number,
+web address, or postal address is correct. Change the rule to suit your process.
 
-## Register the route and implement the handler
+`missing_fields` lists the Sugar field names that need data. An empty list means
+none of the required values are missing. `schema_version` is our response format’s
+version number. It is separate from Sugar’s API version. If you change the
+response in a way that could break an app, plan how that app will move to the new
+format.
 
-Create this file under your Sugar application root:
+## Add the endpoint
+
+Create this file under your Sugar application folder:
 
 `custom/clients/base/api/SdgAccountSummaryApi.php`
 
-The file and class names match. The complete implementation is below; the
-repository contains the same implementation as a downloadable file.
+The PHP class and file have the same name. A class groups related code. Here,
+`SdgAccountSummaryApi` extends Sugar’s `SugarApi` class, so it can use Sugar’s
+API system. `registerApiRest()` tells Sugar which address to use and which method
+should handle the request. A method is a function inside a class.
+
+This is the full endpoint. The same code is available as a file in the repository.
 
 ```php
 <?php
@@ -170,49 +188,62 @@ class SdgAccountSummaryApi extends SugarApi
 }
 ```
 
-There are four useful details here.
+## Check access before returning data
 
-First, `noLoginRequired` is explicitly false. Sugar handles authentication before
-this handler runs. The endpoint doesn’t parse passwords or manufacture its own
-session system.
+The code follows four steps.
 
-Second, the route maps only the wildcard to `record`. We accept a hyphenated Sugar
-GUID and reject malformed values before retrieval. We also hard-code Accounts:
-this is not an arbitrary-module data reader.
+First, Sugar checks the user’s login. Setting `noLoginRequired` to false means
+this endpoint requires authentication: proof of who is making the request.
+The code does not build a second login system.
 
-Third, `BeanFactory::retrieveBean()` uses normal retrieval security. We do not
-turn off row-level security. If retrieval finds no visible record, the handler
-returns a not-found error. The separate `ACLAccess('view')` check enforces record
-view permission on a retrieved bean.
+Second, it checks the Account ID. We accept a Sugar GUID (globally unique
+identifier): an ID in the letter-and-number format shown in the sample response.
+A value in the wrong format is rejected before Sugar looks for the record.
+The code always reads Accounts; the caller cannot choose another module.
 
-Fourth, we check every source field before reading values. A user who cannot
-read billing country must not learn about its contents through `handoff.ready`
-or `missing_fields`.
+Third, it loads the Account through `BeanFactory::retrieveBean()`. A bean is
+Sugar’s code object for a record. This method keeps Sugar’s normal team rules in
+place. We then check whether the user may view that record.
 
-This example rejects the entire summary if any source field is restricted,
-including the optional website. That keeps one fixed success contract. Another
-design could omit restricted fields, but then it must define partial responses
-and protect derived information too. Decide that policy deliberately.
+Fourth, it checks read access to all five fields before reading their values.
+The method names contain ACL, which means access control list. These checks use
+Sugar’s permission rules for records and fields.
 
-## Install it without hunting for dependencies
+Why check the fields before calculating `ready`? Suppose a user cannot read
+billing country. A result based on that field could still reveal information
+about it. The checks protect both the field values and results based on them.
 
-The [topic guide](https://github.com/sugardevelopersguide/sugar-developers-guide-examples/blob/main/rest-api/README.md)
-links to an installable ZIP. Upload that topic ZIP through Admin → Module Loader,
-then run Quick Repair and Rebuild. The ZIP contains the endpoint and a small
-Platforms extension registering `sdg_examples` for the companion client.
+In this example, a denied field blocks the whole summary. That includes website,
+even though website is optional in the missing-data rule. This keeps the success
+response the same for every allowed request. You could choose to leave out
+restricted fields instead, but then you must define how partial responses and
+calculated values should work.
 
-For on-site development, you can instead copy those two source files into their
-matching paths. Choose one installation method. Don’t deploy the article, client,
-or test files into Sugar’s public application directory.
+## Install it in a test copy of Sugar
 
-Open your instance’s `/rest/v11_27/help` page and look for the SDG summary route.
-If it is missing, use Rebuild API Metadata in Admin → Repair where available.
-The guide includes removal instructions as well; this example creates no fields
-or business records.
+The [setup guide](https://github.com/sugardevelopersguide/sugar-developers-guide-examples/blob/main/rest-api/README.md)
+links to the ZIP file. Upload that file through Admin → Module Loader. Then run
+Admin → Repair → Quick Repair and Rebuild.
 
-## Make the first request
+The package adds two files: the endpoint and a file that registers `sdg_examples`
+as an API platform. In this case, a platform is a name used to identify the app
+when it logs in. A separate name helps avoid conflicts with your browser login.
 
-Clone or download the companion repository. From its root, run:
+If you manage Sugar on your own server, you can copy the two files into the paths
+listed in the guide instead. Choose one install method. Keep the article, client
+program, and tests outside Sugar’s public application folder.
+
+Open `/rest/v11_27/help` on your Sugar site and look for the SDG summary address.
+If it is missing, use Rebuild API Metadata in Admin → Repair, where available.
+That rebuild updates Sugar’s list of API endpoints.
+
+The setup guide also explains how to remove the example. It adds no fields or
+business records.
+
+## Call the endpoint
+
+Download the companion repository. Open a terminal (command window) in its main folder
+and run this command. You will need Python 3, with no extra libraries.
 
 ```sh
 python3 rest-api/examples/account_summary.py \
@@ -221,71 +252,80 @@ python3 rest-api/examples/account_summary.py \
   --username YOUR-TEST-USER
 ```
 
-Replace the URL, record ID, and username with your sandbox values. The client
-requires Python 3 and no additional libraries. It prompts for your password,
-requests an OAuth token using the registered `sdg_examples` platform, then calls
-the endpoint with Sugar’s `OAuth-Token` header. It requires HTTPS, refuses
-redirects, and prints the record response rather than the token response.
+Replace the site address, Account ID, and username with your test values. The
+program asks for your password without showing it on screen.
 
-If your organization uses SugarIdentity/SSO or does not allow that password flow,
-obtain a token through your supported authentication flow and omit `--username`.
-The client will prompt for an existing access token instead.
+It uses Sugar’s OAuth 2.0 login process to get an access token. A token is a
+temporary value that proves the app has logged in. The program sends that value
+in the `OAuth-Token` request header. A header is information sent with a web
+request. The program uses HTTPS to encrypt the connection, refuses redirects to
+another address, and prints only the Account response.
 
-Add `--standard` to the same command to retrieve the source fields through
-Sugar’s existing Accounts API. That comparison is the point: the standard API
-gets the data; our endpoint applies the tutorial’s response contract and handoff
-rule.
+Some organizations use SugarIdentity or single sign-on (SSO), where one login
+works across several apps. If your system does not allow the password login used
+here, get an access token through your supported login process. Leave out
+`--username` and the program will ask for the token instead.
 
-Use a dedicated test user. A separate registered platform helps avoid conflicts
-with the normal browser client, but repeated logins with the same user and
-platform may still invalidate an earlier session.
+Add `--standard` to the command to call Sugar’s built-in Accounts endpoint with
+the same five fields. Compare that response with our summary. Both read the same
+record. Our endpoint adds the grouping and the missing-data rule.
 
-## Test the unhappy paths, too
+Use a separate test user. Repeated logins with the same user and platform name
+may end an earlier session.
 
-A successful request as an administrator is the beginning of testing.
+## Test errors as well as success
 
-Try a normal user who can view the Account and all five fields. Then try a user
-who cannot view that record, an Account outside the user’s teams, and a role that
-denies one of the source fields. None of the denied cases should return account
-values or a readiness result.
+Start with a normal user who can view the Account and read all five fields.
+Then try these cases:
 
-Blank a required field on a disposable sandbox Account. The response should
-remain successful, with `ready` false and that Sugar field name in
-`missing_fields`. Blank only website and readiness should stay true if the
-required fields are present.
+- A user who cannot view the Account.
+- An Account outside the user’s teams.
+- A role that denies read access to one source field.
+- A required field that is blank.
+- A blank website, with all required fields filled in.
 
-The handler uses Sugar’s stock exceptions: invalid GUID maps to
-`SugarApiExceptionInvalidParameter` (422), missing record to
-`SugarApiExceptionNotFound` (404), and denied access to
-`SugarApiExceptionNotAuthorized` (403). Team-restricted retrieval may produce 404
-before the view check. Missing or expired authentication is rejected by Sugar,
-not handled by our method. Use an HTTP client to exercise malformed IDs and
-missing tokens; the Python client validates IDs locally and always asks for
-authentication.
+Denied access should return no Account data and no `ready` result. A blank
+required field should return `ready: false` and name the field in `missing_fields`.
+A blank website alone should not make `ready` false.
 
-The repository’s isolated tests cover our validation, permission checks, response
-shape, and presence rule. They also inspect the client’s requests without making
-network calls. They do not exercise a real Sugar installation’s OAuth, routing,
-team security, or Module Loader. Live sandbox verification is still required;
-this example has not yet been run against a live Sugar instance.
+The endpoint uses Sugar’s built-in error classes. An error class tells Sugar
+which response to send. A web response includes an HTTP status code: a number
+that says whether the request worked.
 
-## Keep the example close to the article
+| Result                        | Status | Error class                         |
+| ----------------------------- | ------ | ----------------------------------- |
+| ID has the wrong format       | 422    | `SugarApiExceptionInvalidParameter` |
+| Account not found             | 404    | `SugarApiExceptionNotFound`         |
+| Record or field access denied | 403    | `SugarApiExceptionNotAuthorized`    |
 
-Every executable example in this installment is in the
-[Month 5 folder](https://github.com/sugardevelopersguide/sugar-developers-guide-examples/tree/main/rest-api).
-Start at its README for setup and direct file links. The repository-wide
-[examples catalog](https://github.com/sugardevelopersguide/sugar-developers-guide-examples/blob/main/EXAMPLES.md)
-helps you find earlier topics and identifies entries that still need code.
+An Account hidden by team rules may return 404 before the view check runs.
+Sugar handles missing or expired login tokens before this method runs.
 
-What response have you needed that Sugar’s standard API didn’t give you? Share
-the input and the JSON shape you wanted, using fictional data. That would make a
-useful next example.
+Use an HTTP client, such as Postman, to test missing tokens and IDs in the wrong
+format. The Python program checks ID format before sending a request and always
+asks for a login or token.
 
-Next in the series: SugarQuery—querying Sugar data without turning every
-integration into a collection of SQL strings.
+The repository includes tests for the example’s input checks, permission checks,
+response format, and missing-data rule. It also tests the Python requests without
+connecting to a server. These tests use stand-ins for Sugar. They do not prove
+that installation, login, or team rules work in a real Sugar system. **The example
+still needs a check in a real Sugar test system before use with business data.** It has not yet been
+run against a live Sugar instance.
+
+## Find all the example files
+
+Start at the [Month 5 guide](https://github.com/sugardevelopersguide/sugar-developers-guide-examples/tree/main/rest-api)
+for setup steps, a download, and direct links to each file. The
+[examples index](https://github.com/sugardevelopersguide/sugar-developers-guide-examples/blob/main/EXAMPLES.md)
+also lists earlier topics and shows which ones still need code.
+
+What output have you needed from Sugar’s API? Share the input and the JSON
+response you wanted, using made-up data. That could become a future example.
+
+Next in the series: SugarQuery, Sugar’s tool for building database queries in PHP.
 
 ## Further reading
 
-- [Sugar 26.1 REST API and authentication](https://support.sugarai.com/documentation/sugar_developer/sugar_developer_guide_26.1/integration/web_services/rest_api/)
-- [Extending endpoints](https://support.sugarai.com/documentation/sugar_developer/sugar_developer_guide_26.1/integration/web_services/rest_api/extending_endpoints/)
-- [Stock API exceptions](https://support.sugarai.com/documentation/sugar_developer/sugar_developer_guide_25.1/integration/web_services/rest_api/api_exceptions/)
+- [Sugar 26.1 REST API and login](https://support.sugarai.com/documentation/sugar_developer/sugar_developer_guide_26.1/integration/web_services/rest_api/)
+- [Add API endpoints](https://support.sugarai.com/documentation/sugar_developer/sugar_developer_guide_26.1/integration/web_services/rest_api/extending_endpoints/)
+- [Sugar API errors](https://support.sugarai.com/documentation/sugar_developer/sugar_developer_guide_25.1/integration/web_services/rest_api/api_exceptions/)

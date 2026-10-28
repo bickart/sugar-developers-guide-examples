@@ -15,12 +15,26 @@ custom modules, external services, or database changes.
 - [Review the isolated endpoint tests](tests/run.php) and [client tests](tests/test_client.py).
 - [Browse all examples](../EXAMPLES.md).
 
-## Contract
+## Terms used in this guide
+
+- An **API** (application programming interface) lets one program ask another for
+  data or an action. **REST** means Representational State Transfer, a common way
+  to build web APIs. An **endpoint** is one address an app can call.
+- **JSON** (JavaScript Object Notation) is a text format for exchanging data.
+- A **GUID** (globally unique identifier) is the record ID format used below.
+- **ACL** means access control list: Sugar's rules for who may read or change data.
+- A **sandbox** is a test copy of Sugar. A **module** is a group of one record type.
+- An **OAuth access token** is a temporary value that proves an app has logged in.
+  A **platform** is a name used to identify the app when it logs in.
+- **PHP** is the language used for the endpoint. The Python client is a separate
+  program that sends requests to it. Run commands in a terminal (command window).
+
+## Response format
 
 `GET /rest/v11_27/SDG/Accounts/{record}/summary`
 
-Use an API version supported by your instance; `v11_27` is the documented maximum
-in Sugar 26.1. `record` must be a hyphenated Sugar GUID. This route is separate
+Use an API version supported by your Sugar system; the Sugar 26.1 guide lists
+versions up to `v11_27`. `record` must be a Sugar GUID with hyphens. This address is separate
 from stock `/Accounts/{record}` and does not override it.
 
 ```json
@@ -31,10 +45,10 @@ from stock `/Accounts/{record}` and does not override it.
     "name": "Example Account"
   },
   "contact": {
-    "phone": "+1 202-555-0147",
+    "phone": "+44 20 7946 0123",
     "website": "https://example.com"
   },
-  "billing": { "city": "Portland", "country": "USA" },
+  "billing": { "city": "London", "country": "United Kingdom" },
   "handoff": { "ready": true, "missing_fields": [] }
 }
 ```
@@ -44,13 +58,15 @@ Account ID. Readiness means `name`, `phone_office`, `billing_address_city`, and
 `billing_address_country` are nonblank after trimming. It is an example presence
 rule, not validation of phone numbers, addresses, countries, or URLs. Website is
 optional. Empty/null source values become empty strings. Missing fields use the
-original Sugar field names, in the order above.
+original Sugar field names, in the order above. `schema_version` identifies the
+version of our response format, separate from Sugar's API version.
 
 An authenticated user must have record view access and read access to **all five**
 source fields, including optional `website`. A restricted field rejects the whole
 response with 403, before values are read or readiness is calculated. This is a
-deliberate fixed-contract policy. If you choose to omit restricted fields instead,
-document that separate response contract and protect derived values too.
+deliberate choice to keep the success response the same for all allowed requests.
+If you leave out restricted fields instead, explain how that response works and
+protect any values calculated from those fields too.
 
 ## Install in a sandbox
 
@@ -84,7 +100,7 @@ under Sugar's public application directory.
 
 ## Make a request
 
-From the repository root:
+From the repository's main folder:
 
 ```sh
 python3 rest-api/examples/account_summary.py \
@@ -98,7 +114,7 @@ with the registered `sdg_examples` platform, then calls the summary using the
 `OAuth-Token` header. It keeps tokens in memory and prints only the record response.
 It requires HTTPS and refuses redirects. Use your canonical Sugar URL.
 
-For SugarIdentity/SSO or other authentication policies that do not permit this
+For SugarIdentity, single sign-on (SSO), or other login rules that do not permit this
 password flow, obtain an access token through your supported flow and omit
 `--username`; the client prompts for that token instead. Passwords and tokens are
 not command-line arguments. Repeated logins with the same user/platform may
@@ -136,7 +152,7 @@ failure and authentication configuration; consult your instance's API help.
 
 ## Local checks and rebuild
 
-No Sugar installation is required for these isolated tests:
+No Sugar installation is required for these tests. They use stand-ins for Sugar:
 
 ```sh
 php rest-api/tests/run.php

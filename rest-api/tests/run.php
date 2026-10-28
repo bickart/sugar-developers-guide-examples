@@ -43,10 +43,10 @@ class TestAccount
     public array $readFields = [];
     public array $values = [
         'name' => ' Example Account ',
-        'phone_office' => '+1 202-555-0147',
+        'phone_office' => '+44 20 7946 0123',
         'website' => 'https://example.com',
-        'billing_address_city' => 'Portland',
-        'billing_address_country' => 'USA',
+        'billing_address_city' => 'London',
+        'billing_address_country' => 'United Kingdom',
         'description' => 'This field must never be returned.',
     ];
     public function ACLAccess($action)
@@ -122,8 +122,8 @@ $result = $invoke(['record' => $id]);
 check($result === [
     'schema_version' => 1,
     'account' => ['id' => $id, 'name' => 'Example Account'],
-    'contact' => ['phone' => '+1 202-555-0147', 'website' => 'https://example.com'],
-    'billing' => ['city' => 'Portland', 'country' => 'USA'],
+    'contact' => ['phone' => '+44 20 7946 0123', 'website' => 'https://example.com'],
+    'billing' => ['city' => 'London', 'country' => 'United Kingdom'],
     'handoff' => ['ready' => true, 'missing_fields' => []],
 ], 'Exact allowlisted contract, normalized values, no unexpected bean fields');
 foreach (BeanFactory::$calls as $call) {

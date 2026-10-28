@@ -1,5 +1,14 @@
 # Contributor Instructions
 
+## Reader-facing writing
+
+Write articles, guides, and the examples index in plain language at a ninth-grade
+reading level or below. Readers may live outside the United States and may read
+English as a second language. Use short, direct sentences. Avoid idioms and
+unneeded jargon. Spell out unfamiliar acronyms and explain needed technical terms
+when they first appear. Use neutral examples and clear international formats.
+Keep code identifiers exact; explain their meaning in the surrounding prose.
+
 ## Copyright notice
 
 Every newly created source file must begin with the following copyright notice,
