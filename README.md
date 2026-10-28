@@ -1,7 +1,18 @@
 # Sugar Developers Guide Examples
 
-Official companion code for the Sugar Developers Guide Substack. Each topic contains
-copy-ready, upgrade-safe Sugar customization examples.
+Official companion code for the [Sugar Developers Guide](https://sugardevelopersguide.substack.com/).
+Start with the [examples catalog](EXAMPLES.md) to find code, setup instructions,
+article links, and available downloads. Some topics are placeholders; the catalog
+identifies them explicitly.
+
+## Latest: Month 5 — Custom REST APIs
+
+When Sugar's standard API does not return the output your integration needs,
+build a small endpoint with an explicit response contract.
+
+**[Start the account-summary tutorial](rest-api/README.md)** ·
+[View the endpoint](rest-api/custom/clients/base/api/SdgAccountSummaryApi.php) ·
+[Download the installable ZIP](rest-api/builds/sugardevelopersguiderestapiexamples_1.0.0.zip)
 
 ## Topics
 
@@ -9,6 +20,7 @@ copy-ready, upgrade-safe Sugar customization examples.
 - [Vardefs](vardefs/README.md)
 - [Layouts and Views](layouts-and-views/README.md)
 - [Logic Hooks](logic-hooks/README.md)
+- [Custom REST APIs — account summary](rest-api/README.md)
 - [Scheduler Jobs](scheduler-jobs/README.md)
 - [Installation](installation/README.md)
 
