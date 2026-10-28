@@ -1,8 +1,8 @@
 # Find an example
 
-Pick a task, open its guide, then use the linked source or topic ZIP. Each topic's
-`custom/` directory mirrors paths inside the Sugar application. The repository
-download is **not** itself a Module Loader package.
+Choose a task below. Open its guide. Then open the code or download its ZIP file.
+Files in `custom/` use the same folder paths as Sugar. A ZIP of this whole
+repository cannot be installed through Module Loader.
 
 | Task / series installment                   | Guide                                                | Available material                                                                                                                                             |
 | ------------------------------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -14,9 +14,9 @@ download is **not** itself a Module Loader package.
 | Run background work — Month 7               | [Scheduler Jobs](scheduler-jobs/README.md)           | Topic placeholder; no implementation files yet                                                                                                                 |
 | Configure a development installation        | [Installation](installation/README.md)               | Silent-install configuration example                                                                                                                           |
 
-The older topic snippets may require their referenced modules or additional setup;
-they are not all standalone tutorials. Existing archives are listed for discovery,
-not as a new claim of runtime validation. Month 5 uses only stock Accounts fields.
+Older examples are short pieces of code. Some need extra modules or setup.
+These links do not mean the older examples have been tested again.
+Month 5 needs only the built-in Accounts module and its fields.
 
 ## Month 5 file map
 
@@ -33,14 +33,13 @@ not as a new claim of runtime validation. Month 5 uses only stock Accounts field
 
 ## How to use the library
 
-1. Follow the topic guide before copying files or installing a ZIP.
-2. Use a sandbox and a test user whose roles match the integration.
-3. Copy only documented deployment files. Keep clients and tests outside Sugar.
-4. Follow each topic's verification notes; passing isolated tests does not verify
-   the real instance's routing, authentication, teams, or field security.
+1. Read the guide before you copy files or install a ZIP.
+2. Use a test copy of Sugar. Give the test user the same roles as your app's user.
+3. Copy only the files listed in the guide. Keep client programs and tests outside Sugar.
+4. Follow the test steps in the guide. Local tests do not prove that a real Sugar
+   system will handle login, API addresses, teams, or field access as expected.
 
-For future articles, add every source example under one topic and link it here.
-Each topic should include prerequisites, full paths, a request and response,
-installation/removal instructions, validation status, and a link back to the
-published article once its URL exists. Mark incomplete topics rather than
-presenting them as working downloads.
+For each new article, put its code in one topic folder. Link to that folder here.
+State what the reader needs and where each file goes. Show a request and response.
+Explain how to install, test, and remove the example. State which tests have run.
+Add a link to the article once it is published. Mark topics that still need code.
