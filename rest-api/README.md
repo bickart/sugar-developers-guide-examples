@@ -31,10 +31,11 @@ custom modules, external services, or database changes.
 
 ## Response format
 
-`GET /rest/v11_27/SDG/Accounts/{record}/summary`
+`GET /rest/v11/SDG/Accounts/{record}/summary`
 
-Use an API version supported by your Sugar system; the Sugar 26.1 guide lists
-versions up to `v11_27`. `record` must be a Sugar GUID with hyphens. This address is separate
+Use the widely supported `/rest/v11` base path for this example. The endpoint
+sets no API version limits, so it is not restricted to `v11_27`. `record` must be a
+Sugar GUID with hyphens. This address is separate
 from stock `/Accounts/{record}` and does not override it.
 
 ```json
@@ -79,7 +80,7 @@ same files. First confirm these uniquely named files do not already exist.
    downloads the repository, which is not a Module Loader package.
 2. In Sugar, open **Admin → Module Loader**, upload the topic ZIP, and install it.
 3. Run **Admin → Repair → Quick Repair and Rebuild** to register `sdg_examples`.
-4. Open `https://YOUR-SUGAR/rest/v11_27/help` and find the SDG summary route. If the
+4. Open `https://YOUR-SUGAR/rest/v11/help` and find the SDG summary route. If the
    route is missing, use **Admin → Repair → Rebuild API Metadata** where available.
 5. Try the client below with a sandbox Account the test user can view.
 
@@ -108,7 +109,7 @@ From the repository's main folder:
 
 ```sh
 php rest-api/examples/account_summary.php \
-  --base https://YOUR-SUGAR/rest/v11_27 \
+  --base https://YOUR-SUGAR/rest/v11 \
   --record YOUR-ACCOUNT-GUID \
   --username YOUR-TEST-USER
 ```
@@ -177,7 +178,7 @@ PHP client tests inspect outgoing requests without a network connection. They do
 verify Sugar's real route discovery, OAuth, team security, Module Loader, or role
 engine. **Live Sugar installation and the scenario checks above remain required
 before production use or a claim of runtime compatibility.** Target: Sugar 26.1,
-API v11_27. No live Sugar execution was available when this example was authored.
+API v11. No live Sugar execution was available when this example was authored.
 
 The standalone client and its tests use PHP 8.2-compatible code. The repository's
 development tools need PHP 8.4, as listed in `composer.json`. That higher version

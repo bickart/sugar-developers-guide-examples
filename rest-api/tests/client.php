@@ -34,7 +34,7 @@ function clientFailure(callable $action, string $message): void
     throw new RuntimeException('Expected failure: ' . $message);
 }
 
-$base = 'https://crm.example.com/rest/v11_27';
+$base = 'https://crm.example.com/rest/v11';
 $record = '11111111-2222-3333-4444-555555555555';
 $calls = [];
 $prompts = [];

@@ -45,7 +45,7 @@ final class AccountSummaryClient
             || filter_var($base, FILTER_VALIDATE_URL) === false
             || !preg_match('~/rest/v\d+(?:_\d+)?/?$~D', $parts['path'] ?? '')
         ) {
-            throw new InvalidArgumentException('Use an HTTPS API base such as https://crm.example.com/rest/v11_27');
+            throw new InvalidArgumentException('Use an HTTPS API base such as https://crm.example.com/rest/v11');
         }
         if (!preg_match('/\A[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\z/i', $record)) {
             throw new InvalidArgumentException('--record must be a Sugar GUID');

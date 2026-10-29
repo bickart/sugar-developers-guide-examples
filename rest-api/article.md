@@ -47,15 +47,16 @@ ability to return the fields.
 Our endpoint has this address:
 
 ```text
-/rest/v11_27/SDG/Accounts/{record}/summary
+/rest/v11/SDG/Accounts/{record}/summary
 ```
 
 The app sends a GET request to this address. GET asks for data; this endpoint does
 not change the Account. `SDG` gives our example a separate name, so it does not
 replace Sugar’s existing Accounts endpoints.
 
-The `{record}` part is the Account ID. The example uses API version v11_27,
-listed in the Sugar 26.1 guide. Use a version supported by your own Sugar system.
+The `{record}` part is the Account ID. We use the widely supported `/rest/v11`
+base path. Our endpoint does not set API version limits, so it is not restricted
+to `v11_27`.
 
 Here is a sample response. It uses JSON (JavaScript Object Notation), a text
 format that programs use to exchange data. The labels on the left name each
@@ -230,7 +231,7 @@ If you manage Sugar on your own server, you can copy the two files into the path
 listed in the guide instead. Choose one install method. Keep the article, client
 program, and tests outside Sugar’s public application folder.
 
-Open `/rest/v11_27/help` on your Sugar site and look for the SDG summary address.
+Open `/rest/v11/help` on your Sugar site and look for the SDG summary address.
 If it is missing, use Rebuild API Metadata in Admin → Repair, where available.
 That rebuild updates Sugar’s list of API endpoints.
 
@@ -246,7 +247,7 @@ needed to run the client. Keep this program outside the Sugar application folder
 
 ```sh
 php rest-api/examples/account_summary.php \
-  --base https://YOUR-SUGAR/rest/v11_27 \
+  --base https://YOUR-SUGAR/rest/v11 \
   --record YOUR-ACCOUNT-GUID \
   --username YOUR-TEST-USER
 ```
