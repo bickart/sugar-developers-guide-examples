@@ -11,6 +11,8 @@
  * permission, please contact the copyright holders and delete this file.
  */
 
+use Sugarcrm\Sugarcrm\custom\modules\Accounts\Services\AccountReadinessService;
+
 /** Original tutorial example using only stock Accounts fields. */
 class SdgAccountSummaryApi extends ModuleApi
 {
@@ -30,7 +32,8 @@ class SdgAccountSummaryApi extends ModuleApi
 
     public function getAccountSummary($api, $args)
     {
-        $fields = ['name', 'phone_office', 'website', 'billing_address_city', 'billing_address_country'];
+        $service = new AccountReadinessService();
+        $fields = $service->getFieldNames();
         $args['module'] = 'Accounts';
         $args['fields'] = $fields;
         $data = parent::retrieveRecord($api, $args);
@@ -43,18 +46,6 @@ class SdgAccountSummaryApi extends ModuleApi
                 : null;
         }
 
-        // Do not guess whether a value omitted by Sugar is blank.
-        $required = ['name', 'phone_office', 'billing_address_city', 'billing_address_country'];
-        $missing = [];
-        $canCheck = true;
-        foreach ($required as $field) {
-            if ($values[$field] === null) {
-                $canCheck = false;
-            } elseif ($values[$field] === '') {
-                $missing[] = $field;
-            }
-        }
-
         return [
             'schema_version' => 1,
             'account' => ['id' => $data['id'], 'name' => $values['name']],
@@ -63,10 +54,7 @@ class SdgAccountSummaryApi extends ModuleApi
                 'city' => $values['billing_address_city'],
                 'country' => $values['billing_address_country'],
             ],
-            'handoff' => [
-                'ready' => $canCheck ? $missing === [] : null,
-                'missing_fields' => $canCheck ? $missing : null,
-            ],
+            'handoff' => $service->evaluate($data),
         ];
     }
 }

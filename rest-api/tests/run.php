@@ -11,8 +11,9 @@
  * permission, please contact the copyright holders and delete this file.
  */
 
-// Test only the custom mapping. Sugar's own retrieval is represented by a double.
+// Test the API and real service together, with a stand-in for Sugar's retrieval.
 require __DIR__ . '/fixtures/clients/base/api/ModuleApi.php';
+require dirname(__DIR__) . '/custom/modules/Accounts/Services/AccountReadinessService.php';
 require dirname(__DIR__) . '/custom/modules/Accounts/clients/base/api/SdgAccountSummaryApi.php';
 
 function check(bool $condition, string $message): void
@@ -71,14 +72,12 @@ foreach (['missing argument', 'record not found', 'record access denied'] as $me
 }
 ModuleApi::$error = null;
 
-foreach (['name', 'phone_office', 'billing_address_city', 'billing_address_country'] as $field) {
-    ModuleApi::$response = $record;
-    ModuleApi::$response[$field] = '   ';
-    check($invoke(['record' => $id])['handoff'] === ['ready' => false, 'missing_fields' => [$field]], 'Visible blank field is missing: ' . $field);
-    unset(ModuleApi::$response[$field]);
-    $result = $invoke(['record' => $id]);
-    check($result['handoff'] === ['ready' => null, 'missing_fields' => null], 'Do not infer data omitted by Sugar: ' . $field);
-}
+// Verify that the API passes omitted values through to the real service.
+ModuleApi::$response = $record;
+unset(ModuleApi::$response['billing_address_country']);
+$result = $invoke(['record' => $id]);
+check($result['billing']['country'] === null, 'Omitted field remains null in the response');
+check($result['handoff'] === ['ready' => null, 'missing_fields' => null], 'The service receives omitted required fields unchanged');
 ModuleApi::$response = $record;
 unset(ModuleApi::$response['website']);
 $result = $invoke(['record' => $id]);

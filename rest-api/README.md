@@ -2,17 +2,20 @@
 
 Month 5 answers Anand Tupe's request for custom endpoints when Sugar's standard
 API does not return the output an integration needs. This is an original example
-using only the built-in Accounts module and stock fields. It has no client code,
-custom modules, external services, or database changes.
+using only the built-in Accounts module and stock fields. It adds no custom
+modules, external services, or database changes.
 
 ## Start here
 
 - [Read the article](article.md).
 - [Open the complete endpoint](custom/modules/Accounts/clients/base/api/SdgAccountSummaryApi.php).
+- [Open the readiness service](custom/modules/Accounts/Services/AccountReadinessService.php).
 - [Open the platform registration](custom/Extension/application/Ext/Platforms/sdg_examples.php).
 - [Run the PHP client](examples/account_summary.php) (PHP 8.2 or later, with cURL).
 - [Download the installable ZIP](builds/sugardevelopersguiderestapiexamples_1.0.0.zip).
-- [Review the isolated endpoint tests](tests/run.php) and [client tests](tests/client.php).
+- [Review the service unit tests](tests/unit/AccountReadinessServiceTest.php),
+  [endpoint checks](tests/run.php), [client tests](tests/client.php), and
+  [live integration tests](tests/integration/AccountSummaryEndpointTest.php).
 - [Browse all examples](../EXAMPLES.md).
 
 ## Terms used in this guide
@@ -79,6 +82,22 @@ website is `null` but does not prevent readiness when required values are presen
 The custom summary reuses the complete built-in API path rather than reading raw
 bean properties or repeating those permission checks.
 
+## Keep the business rule in a service
+
+`AccountReadinessService` is a plain PHP class. It defines each field once, with
+`required` set to boolean `true` or `false`. The array key is the Sugar field name;
+there is no duplicate `field` property. These settings apply to our readiness
+rule, not Sugar's required-field settings.
+
+The API asks `getFieldNames()` which fields to request. After Sugar returns the
+allowed data, the API passes it to `evaluate()`. The service decides readiness.
+The API still groups the response into account, contact, and billing details.
+
+The service does not load records, run database queries, or depend on an API
+request. Other code can call the same rule. Unit tests can check it without a
+Sugar installation. Sugar loads the service through its existing class loader;
+no extra class registration or manual include is needed in the endpoint.
+
 ## Install in a sandbox
 
 The endpoint lives under `custom/modules/Accounts/clients/base/api/` because it is
@@ -105,12 +124,14 @@ Keep only one copy of the class so Sugar does not load it twice.
 
 ### Copy source files (on-site development)
 
-From the repository root, copy only these two files into the matching paths under
+From the repository root, copy these three files into the matching paths under
 your Sugar application root. Preserve existing unrelated files.
 
 ```text
 rest-api/custom/modules/Accounts/clients/base/api/SdgAccountSummaryApi.php
   → custom/modules/Accounts/clients/base/api/SdgAccountSummaryApi.php
+rest-api/custom/modules/Accounts/Services/AccountReadinessService.php
+  → custom/modules/Accounts/Services/AccountReadinessService.php
 rest-api/custom/Extension/application/Ext/Platforms/sdg_examples.php
   → custom/Extension/application/Ext/Platforms/sdg_examples.php
 ```
@@ -185,22 +206,66 @@ failure and authentication configuration; consult your instance's API help.
 
 ## Local checks and rebuild
 
-No Sugar installation is required for these tests. They use stand-ins for Sugar:
+### Unit tests
+
+A unit test checks one class on its own. These PHPUnit tests call the real service
+with small arrays. They need no Sugar installation, database, or test doubles:
+
+```sh
+vendor/bin/phpunit rest-api/tests/unit
+```
+
+They cover complete records, each required blank value, omitted required values,
+optional website values, more than one missing field, zero values, and unchanged
+input data. A missing key means unknown; a returned null value counts as blank.
+
+### Endpoint and client checks
+
+These checks run locally without a Sugar installation:
 
 ```sh
 php rest-api/tests/run.php
 php rest-api/tests/client.php
 ```
 
-The PHP endpoint tests use a stand-in for `ModuleApi` to check our call to the
-built-in API, returned errors, response format, and missing or omitted values. The
-PHP client tests inspect outgoing requests without a network connection. They do not
-verify Sugar's real route discovery, OAuth, team security, Module Loader, or role
-engine. **Live Sugar installation and the scenario checks above remain required
-before production use or a claim of runtime compatibility.** Target: Sugar 26.1,
-API v11. No live Sugar execution was available when this example was authored.
+The endpoint check uses the real service and a stand-in for `ModuleApi`. It checks
+the API's field selection, response mapping, and handling of Sugar errors. The
+client checks inspect requests without contacting a server. These checks do not
+test the real Sugar permission or login systems.
 
-The standalone client and its tests use PHP 8.2-compatible code. The repository's
+### Integration tests
+
+An integration test checks parts working together. The live tests call both the
+built-in Accounts API and the installed custom endpoint. They compare the allowed
+values and readiness result. A second test checks that Sugar rejects a bad token.
+
+Install the package in a sandbox. Set these environment variables securely in your
+test runner. Environment variables are named settings available to a program:
+
+| Variable                | Value                                                            |
+| ----------------------- | ---------------------------------------------------------------- |
+| `SDG_TEST_BASE`         | Your HTTPS Sugar API base, such as `https://YOUR-SUGAR/rest/v11` |
+| `SDG_TEST_ACCOUNT_ID`   | An existing test Account with made-up data                       |
+| `SDG_TEST_ACCESS_TOKEN` | A valid access token for your test user                          |
+
+Then run:
+
+```sh
+vendor/bin/phpunit rest-api/tests/integration
+```
+
+The tests read records; they do not create or change them. Run them with a normal
+test user, then with a user whose field permissions are restricted. Keep the
+record unchanged during the test, since it makes two separate read requests.
+The tests may show expected and actual values on failure, so use made-up data.
+Do not commit credentials or put tokens in command history.
+
+If configuration or cURL is missing, the tests are marked **skipped**, not passed.
+The separate team and role scenarios above still need testing in your own setup.
+**Live Sugar installation and those checks remain required before production
+use or a claim of runtime compatibility.** Target: Sugar 26.1, API v11.
+
+The service, standalone client, and example tests use PHP 8.2-compatible code. The repository's
 development tools need PHP 8.4, as listed in `composer.json`. That higher version
 is needed to run the formatters, not to run this client. Keep using the PHP version
 supported by your Sugar server for the endpoint itself.
@@ -219,7 +284,7 @@ is a packaging constraint, not proof that every release was tested.
 ## Remove
 
 For Module Loader installations, uninstall the package through Module Loader.
-For manual installations, remove only the two files listed above. Run Quick
+For manual installations, remove only the three files listed above. Run Quick
 Repair and Rebuild and rebuild API metadata afterward. No business data or fields
 are created by this example. Tokens already issued for a platform are not
 automatically revoked by deleting its registration; end test sessions through

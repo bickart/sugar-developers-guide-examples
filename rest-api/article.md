@@ -94,6 +94,80 @@ version number. It is separate from Sugar’s API version. If you change the
 response in a way that could break an app, plan how that app will move to the new
 format.
 
+## Put the readiness rule in a service
+
+The API should handle the request and response. The readiness rule belongs in a
+separate PHP class. This is a small service: code that performs one business
+operation. A logic hook, scheduled job, or another endpoint can use the same rule.
+
+Create this file:
+
+`custom/modules/Accounts/Services/AccountReadinessService.php`
+
+It has one field-definition array. Each key is a Sugar field name. Its `required`
+setting is boolean `true` or `false`, without quotes. There is no need to repeat
+the name in a `field` property. This rule does not change Sugar's own required-field
+settings.
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace Sugarcrm\Sugarcrm\custom\modules\Accounts\Services;
+
+/** Evaluates account readiness using only values supplied by its caller. */
+final class AccountReadinessService
+{
+    private const FIELD_DEFINITIONS = [
+        'name' => ['required' => true],
+        'phone_office' => ['required' => true],
+        'website' => ['required' => false],
+        'billing_address_city' => ['required' => true],
+        'billing_address_country' => ['required' => true],
+    ];
+
+    public function getFieldNames(): array
+    {
+        return array_keys(self::FIELD_DEFINITIONS);
+    }
+
+    /** A missing key is unknown; a returned null or blank value is missing data. */
+    public function evaluate(array $data): array
+    {
+        $missing = [];
+        $canCheck = true;
+
+        foreach (self::FIELD_DEFINITIONS as $field => $definition) {
+            if (!$definition['required']) {
+                continue;
+            }
+            if (!array_key_exists($field, $data)) {
+                $canCheck = false;
+            } elseif (trim((string) ($data[$field] ?? '')) === '') {
+                $missing[] = $field;
+            }
+        }
+
+        return [
+            'ready' => $canCheck ? $missing === [] : null,
+            'missing_fields' => $canCheck ? $missing : null,
+        ];
+    }
+}
+```
+
+`getFieldNames()` gives the API the field names from that one definition.
+`evaluate()` decides whether the returned data is complete. The service takes an
+array; it does not load a bean, access the database, or read the web request.
+
+The namespace at the top groups the class under Accounts services. Sugar's class
+loader maps that name to the file location. The API uses a `use` statement to
+refer to the class by its short name. It needs no manual `require_once`.
+
+This separation also lets us add focused unit tests for the rule and integration
+tests for the full endpoint. We will explain both below.
+
 ## Add the endpoint
 
 Create this file under your Sugar application folder:
@@ -114,6 +188,8 @@ This is the full endpoint. The same code is available as a file in the repositor
 ```php
 <?php
 
+use Sugarcrm\Sugarcrm\custom\modules\Accounts\Services\AccountReadinessService;
+
 /** Original tutorial example using only stock Accounts fields. */
 class SdgAccountSummaryApi extends ModuleApi
 {
@@ -133,7 +209,8 @@ class SdgAccountSummaryApi extends ModuleApi
 
     public function getAccountSummary($api, $args)
     {
-        $fields = ['name', 'phone_office', 'website', 'billing_address_city', 'billing_address_country'];
+        $service = new AccountReadinessService();
+        $fields = $service->getFieldNames();
         $args['module'] = 'Accounts';
         $args['fields'] = $fields;
         $data = parent::retrieveRecord($api, $args);
@@ -146,18 +223,6 @@ class SdgAccountSummaryApi extends ModuleApi
                 : null;
         }
 
-        // Do not guess whether a value omitted by Sugar is blank.
-        $required = ['name', 'phone_office', 'billing_address_city', 'billing_address_country'];
-        $missing = [];
-        $canCheck = true;
-        foreach ($required as $field) {
-            if ($values[$field] === null) {
-                $canCheck = false;
-            } elseif ($values[$field] === '') {
-                $missing[] = $field;
-            }
-        }
-
         return [
             'schema_version' => 1,
             'account' => ['id' => $data['id'], 'name' => $values['name']],
@@ -166,10 +231,7 @@ class SdgAccountSummaryApi extends ModuleApi
                 'city' => $values['billing_address_city'],
                 'country' => $values['billing_address_country'],
             ],
-            'handoff' => [
-                'ready' => $canCheck ? $missing === [] : null,
-                'missing_fields' => $canCheck ? $missing : null,
-            ],
+            'handoff' => $service->evaluate($data),
         ];
     }
 }
@@ -183,8 +245,8 @@ permission checks.
 First, `noLoginRequired` is false, so Sugar checks the user’s login. This is
 called authentication: proof of who is making the request.
 
-Next, we set the module to Accounts and select the five fields we need. The
-caller cannot change that selection. `parent::retrieveRecord()` then calls the
+Next, the API asks the service which fields it needs. We fix the module to
+Accounts and select those fields. The caller cannot change that selection. `parent::retrieveRecord()` then calls the
 built-in `ModuleApi` method. It checks required arguments, loads the record,
 checks view access, and formats the response using Sugar’s field permissions.
 
@@ -204,8 +266,9 @@ available, both `ready` and `missing_fields` are `null`. We cannot decide whethe
 that Account is ready from the data we received. A website left out by Sugar
 remains `null`, but does not affect readiness because website is optional.
 
-This keeps permission handling in Sugar’s standard code. Our code only groups
-the allowed values and applies the missing-data rule.
+This keeps permission handling in Sugar’s standard code. The API groups the
+allowed values. The service applies the missing-data rule to that same returned
+data.
 
 ## Install it in a test copy of Sugar
 
@@ -213,11 +276,11 @@ The [setup guide](https://github.com/sugardevelopersguide/sugar-developers-guide
 links to the ZIP file. Upload that file through Admin → Module Loader. Then run
 Admin → Repair → Quick Repair and Rebuild.
 
-The package adds two files: the endpoint and a file that registers `sdg_examples`
-as an API platform. In this case, a platform is a name used to identify the app
+The package adds three files: the endpoint, the readiness service, and a file that
+registers `sdg_examples` as an API platform. In this case, a platform is a name used to identify the app
 when it logs in. A separate name helps avoid conflicts with your browser login.
 
-If you manage Sugar on your own server, you can copy the two files into the paths
+If you manage Sugar on your own server, you can copy the three files into the paths
 listed in the guide instead. Choose one install method. Keep the article, client
 program, and tests outside Sugar’s public application folder.
 
@@ -299,12 +362,52 @@ Neither our endpoint nor the PHP client requires a GUID-shaped ID. The client
 encodes the ID as one part of the address and lets Sugar handle the lookup. To
 test missing authentication, use an HTTP client, such as Postman, without a token.
 
-The repository includes tests that check our call to the built-in API, response
-format, missing-data rule, and handling of values Sugar leaves out. It also checks requests from the PHP client without
-connecting to a server. These tests use stand-ins for Sugar. They do not prove
-that installation, login, or team rules work in a real Sugar system. **The example
-still needs a check in a real Sugar test system before use with business data.** It has not yet been
-run against a live Sugar instance.
+## Add unit and integration tests
+
+Moving the rule into a service gives us two clear test levels.
+
+A **unit test** checks the service on its own. We pass it small arrays and check
+its answer. There is no database, API login, or Sugar installation involved. We
+can test a complete record, blank required fields, an optional website, and values
+left out of the data. These tests are fast and help us change the rule safely.
+
+The repository includes the complete
+[service unit tests](https://github.com/sugardevelopersguide/sugar-developers-guide-examples/blob/main/rest-api/tests/unit/AccountReadinessServiceTest.php).
+With the repository's development tools installed, run:
+
+```sh
+vendor/bin/phpunit rest-api/tests/unit
+```
+
+An **integration test** checks parts working together. After installing the
+example in a Sugar sandbox, the live tests call both the built-in Accounts API
+and our endpoint. They check that the summary uses the same allowed values and
+that the service's readiness result reaches the response. A second test checks
+that Sugar rejects a bad access token.
+
+The [setup guide](https://github.com/sugardevelopersguide/sugar-developers-guide-examples/blob/main/rest-api/README.md)
+explains how to supply the test site, Account ID, and access token as environment
+variables. These are named settings available to the test program. Use made-up
+Account data and keep credentials out of the repository and command history.
+Then run:
+
+```sh
+vendor/bin/phpunit rest-api/tests/integration
+```
+
+Without a configured Sugar test system, those tests are marked skipped. A skipped
+test is not a pass. The local endpoint checks use the real service and a stand-in
+for Sugar's record API; they do not prove that Sugar's login or permission rules
+work in an installed system.
+
+Run the live tests with a normal user and a user with restricted field access.
+Also test the team and role cases listed above. The tests read data without
+changing records. Keep the test Account unchanged while they run.
+
+The example code supports PHP 8.2 or later. The development tools in this
+repository, including its installed PHPUnit test runner, require PHP 8.4.
+**A check in a real Sugar test system is still needed before use with business
+data.**
 
 ## Find all the example files
 

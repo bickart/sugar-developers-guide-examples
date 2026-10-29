@@ -4,15 +4,15 @@ Choose a task below. Open its guide. Then open the code or download its ZIP file
 Files in `custom/` use the same folder paths as Sugar. A ZIP of this whole
 repository cannot be installed through Module Loader.
 
-| Task / series installment                   | Guide                                                | Available material                                                                                                                                             |
-| ------------------------------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Customize layouts and views — Month 1       | [Layouts and Views](layouts-and-views/README.md)     | Accounts UI and JobQueue snippets; [topic ZIP](layouts-and-views/builds/sugardevelopersguidelayoutsandviewsexamples_26.7.0.zip)                                |
-| Use extension points — Month 2              | [Extension Framework](extension-framework/README.md) | Extension and custom-field snippets; [topic ZIP](extension-framework/builds/sugardevelopersguideextensionframeworkexamples_26.7.0.zip)                         |
-| Define and override fields — Month 3        | [Vardefs](vardefs/README.md)                         | Vardef and language snippets; [topic ZIP](vardefs/builds/sugardevelopersguidevardefsexamples_26.7.0.zip)                                                       |
-| Respond to saves and other events — Month 4 | [Logic Hooks](logic-hooks/README.md)                 | Topic placeholder; no implementation files yet                                                                                                                 |
-| Return a tailored API response — Month 5    | [Custom REST APIs](rest-api/README.md)               | Complete original endpoint, platform registration, client, article, isolated tests; [topic ZIP](rest-api/builds/sugardevelopersguiderestapiexamples_1.0.0.zip) |
-| Run background work — Month 7               | [Scheduler Jobs](scheduler-jobs/README.md)           | Topic placeholder; no implementation files yet                                                                                                                 |
-| Configure a development installation        | [Installation](installation/README.md)               | Silent-install configuration example                                                                                                                           |
+| Task / series installment                   | Guide                                                | Available material                                                                                                                                       |
+| ------------------------------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Customize layouts and views — Month 1       | [Layouts and Views](layouts-and-views/README.md)     | Accounts UI and JobQueue snippets; [topic ZIP](layouts-and-views/builds/sugardevelopersguidelayoutsandviewsexamples_26.7.0.zip)                          |
+| Use extension points — Month 2              | [Extension Framework](extension-framework/README.md) | Extension and custom-field snippets; [topic ZIP](extension-framework/builds/sugardevelopersguideextensionframeworkexamples_26.7.0.zip)                   |
+| Define and override fields — Month 3        | [Vardefs](vardefs/README.md)                         | Vardef and language snippets; [topic ZIP](vardefs/builds/sugardevelopersguidevardefsexamples_26.7.0.zip)                                                 |
+| Respond to saves and other events — Month 4 | [Logic Hooks](logic-hooks/README.md)                 | Topic placeholder; no implementation files yet                                                                                                           |
+| Return a tailored API response — Month 5    | [Custom REST APIs](rest-api/README.md)               | Endpoint, readiness service, PHP client, article, unit and integration tests; [topic ZIP](rest-api/builds/sugardevelopersguiderestapiexamples_1.0.0.zip) |
+| Run background work — Month 7               | [Scheduler Jobs](scheduler-jobs/README.md)           | Topic placeholder; no implementation files yet                                                                                                           |
+| Configure a development installation        | [Installation](installation/README.md)               | Silent-install configuration example                                                                                                                     |
 
 Older examples are short pieces of code. Some need extra modules or setup.
 These links do not mean the older examples have been tested again.
@@ -25,10 +25,13 @@ Month 5 needs only the built-in Accounts module and its fields.
 | Installation, request, troubleshooting, verification | [Start here](rest-api/README.md)                                                                       |
 | Full article                                         | [When Sugar's REST API Doesn't Return What You Need](rest-api/article.md)                              |
 | Route and handler                                    | [SdgAccountSummaryApi.php](rest-api/custom/modules/Accounts/clients/base/api/SdgAccountSummaryApi.php) |
+| Field definitions and readiness rule                 | [AccountReadinessService.php](rest-api/custom/modules/Accounts/Services/AccountReadinessService.php)   |
 | Dedicated OAuth platform                             | [sdg_examples.php](rest-api/custom/Extension/application/Ext/Platforms/sdg_examples.php)               |
 | Stock API / custom API comparison client             | [account_summary.php](rest-api/examples/account_summary.php)                                           |
 | Installable Module Loader package                    | [Download ZIP](rest-api/builds/sugardevelopersguiderestapiexamples_1.0.0.zip)                          |
 | Offline endpoint checks                              | [run.php](rest-api/tests/run.php)                                                                      |
+| Service unit tests                                   | [AccountReadinessServiceTest.php](rest-api/tests/unit/AccountReadinessServiceTest.php)                 |
+| Live integration tests                               | [AccountSummaryEndpointTest.php](rest-api/tests/integration/AccountSummaryEndpointTest.php)            |
 | Offline HTTP client checks                           | [client.php](rest-api/tests/client.php)                                                                |
 
 ## How to use the library

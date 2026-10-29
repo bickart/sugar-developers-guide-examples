@@ -10,6 +10,9 @@ identifies them explicitly.
 When Sugar's standard API does not return the output your integration needs,
 build a small endpoint with an explicit response contract.
 
+The endpoint uses a separate PHP service for its readiness rule. The example
+includes service unit tests and live integration tests for a Sugar sandbox.
+
 **[Start the account-summary tutorial](rest-api/README.md)** ·
 [View the endpoint](rest-api/custom/modules/Accounts/clients/base/api/SdgAccountSummaryApi.php) ·
 [Download the installable ZIP](rest-api/builds/sugardevelopersguiderestapiexamples_1.0.0.zip)
