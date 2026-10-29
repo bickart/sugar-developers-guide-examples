@@ -92,6 +92,11 @@ echo "Created {$archivePath}\n";
 function getTopicConfiguration(string $topic): array
 {
     $configurations = [
+        'rest-api' => [
+            'package_id' => 'SugarDevelopersGuideAccountsRestApiExample',
+            'package_label' => 'Accounts RestAPI Example',
+            'metadata_directory' => null,
+        ],
         'extension-framework' => [
             'package_id' => 'SugarDevelopersGuideExtensionFrameworkExamples',
             'package_label' => 'Sugar Developers Guide | Extension Framework Examples',
