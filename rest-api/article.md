@@ -2,7 +2,7 @@
 
 Create a custom Sugar endpoint that returns data in the format your app needs.
 
-I [asked on LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7509297833817100288/) which code examples would help Sugar developers. Anand Tupe
+I [asked on LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7509297833817100288/) which code examples would help Sugar developers. [Anand Tupe](https://www.linkedin.com/in/anand-tupe-300264112/)
 chose REST APIs. I asked whether he wanted to use Sugar’s existing API or build
 new endpoints.
 
