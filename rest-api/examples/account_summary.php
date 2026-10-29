@@ -47,9 +47,6 @@ final class AccountSummaryClient
         ) {
             throw new InvalidArgumentException('Use an HTTPS API base such as https://crm.example.com/rest/v11');
         }
-        if (!preg_match('/\A[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\z/i', $record)) {
-            throw new InvalidArgumentException('--record must be a Sugar GUID');
-        }
         $base = rtrim($base, '/');
         if ($username !== null) {
             if (trim($username) === '') {
@@ -78,9 +75,10 @@ final class AccountSummaryClient
         if (!is_string($token) || $token === '' || preg_match('/[\x00-\x20\x7f]/', $token)) {
             throw new RuntimeException('A valid access token is required');
         }
+        $recordPath = rawurlencode($record);
         $path = $standard
-            ? '/Accounts/' . $record . '?' . http_build_query(['fields' => self::FIELDS], '', '&', PHP_QUERY_RFC3986)
-            : '/SDG/Accounts/' . $record . '/summary';
+            ? '/Accounts/' . $recordPath . '?' . http_build_query(['fields' => self::FIELDS], '', '&', PHP_QUERY_RFC3986)
+            : '/SDG/Accounts/' . $recordPath . '/summary';
 
         return ($this->send)($base . $path, 'GET', [
             'Accept: application/json',
@@ -183,7 +181,7 @@ if (PHP_SAPI === 'cli' && realpath($_SERVER['SCRIPT_FILENAME'] ?? '') === __FILE
         }
         $options = getopt('', ['base:', 'record:', 'username:', 'standard', 'help']);
         if (isset($options['help'])) {
-            fwrite(STDOUT, "Usage: php rest-api/examples/account_summary.php --base HTTPS-API-BASE --record ACCOUNT-GUID [--username USER] [--standard]\n");
+            fwrite(STDOUT, "Usage: php rest-api/examples/account_summary.php --base HTTPS-API-BASE --record ACCOUNT-ID [--username USER] [--standard]\n");
             exit(0);
         }
         foreach (['base', 'record'] as $required) {

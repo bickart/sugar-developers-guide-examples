@@ -15,8 +15,10 @@ if (!defined('sugarEntry') || !sugarEntry) {
     die('Not A Valid Entry Point');
 }
 
+require_once 'clients/base/api/ModuleApi.php';
+
 /** Original tutorial example using only stock Accounts fields. */
-class SdgAccountSummaryApi extends SugarApi
+class SdgAccountSummaryApi extends ModuleApi
 {
     public function registerApiRest()
     {
@@ -34,54 +36,43 @@ class SdgAccountSummaryApi extends SugarApi
 
     public function getAccountSummary($api, $args)
     {
-        $record = $args['record'] ?? null;
-        if (!is_string($record) || !preg_match(
-            '/\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z/i',
-            $record
-        )) {
-            throw new SugarApiExceptionInvalidParameter('record must be a Sugar GUID');
-        }
-
-        // Keep Sugar's normal row-level security; never bypass it for this endpoint.
-        $account = BeanFactory::retrieveBean('Accounts', $record);
-        if (empty($account) || empty($account->id)) {
-            throw new SugarApiExceptionNotFound('Account not found');
-        }
-        if (!$account->ACLAccess('view')) {
-            throw new SugarApiExceptionNotAuthorized('Account access denied');
-        }
-
         $fields = ['name', 'phone_office', 'website', 'billing_address_city', 'billing_address_country'];
-        foreach ($fields as $field) {
-            if (!$account->ACLFieldAccess($field, 'read')) {
-                // Deny the entire summary before reading values or deriving readiness.
-                throw new SugarApiExceptionNotAuthorized('Summary field access denied');
-            }
-        }
+        $args['module'] = 'Accounts';
+        $args['fields'] = $fields;
+        $data = parent::retrieveRecord($api, $args);
 
+        // Use only the data returned by Sugar's standard record API.
         $values = [];
         foreach ($fields as $field) {
-            $values[$field] = trim((string) ($account->$field ?? ''));
+            $values[$field] = array_key_exists($field, $data)
+                ? trim((string) ($data[$field] ?? ''))
+                : null;
         }
 
-        // Tutorial policy: presence only, not phone, URL, or postal validation.
+        // Do not guess whether a value omitted by Sugar is blank.
         $required = ['name', 'phone_office', 'billing_address_city', 'billing_address_country'];
         $missing = [];
+        $canCheck = true;
         foreach ($required as $field) {
-            if ($values[$field] === '') {
+            if ($values[$field] === null) {
+                $canCheck = false;
+            } elseif ($values[$field] === '') {
                 $missing[] = $field;
             }
         }
 
         return [
             'schema_version' => 1,
-            'account' => ['id' => $account->id, 'name' => $values['name']],
+            'account' => ['id' => $data['id'], 'name' => $values['name']],
             'contact' => ['phone' => $values['phone_office'], 'website' => $values['website']],
             'billing' => [
                 'city' => $values['billing_address_city'],
                 'country' => $values['billing_address_country'],
             ],
-            'handoff' => ['ready' => $missing === [], 'missing_fields' => $missing],
+            'handoff' => [
+                'ready' => $canCheck ? $missing === [] : null,
+                'missing_fields' => $canCheck ? $missing : null,
+            ],
         ];
     }
 }

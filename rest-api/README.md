@@ -34,8 +34,8 @@ custom modules, external services, or database changes.
 `GET /rest/v11/SDG/Accounts/{record}/summary`
 
 Use the widely supported `/rest/v11` base path for this example. The endpoint
-sets no API version limits, so it is not restricted to `v11_27`. `record` must be a
-Sugar GUID with hyphens. This address is separate
+sets no API version limits, so it is not restricted to `v11_27`. `record` is the
+Account ID. The endpoint adds no GUID format rule. This address is separate
 from stock `/Accounts/{record}` and does not override it.
 
 ```json
@@ -58,16 +58,26 @@ This response is illustrative, not a preinstalled record. Use an existing sandbo
 Account ID. Readiness means `name`, `phone_office`, `billing_address_city`, and
 `billing_address_country` are nonblank after trimming. It is an example presence
 rule, not validation of phone numbers, addresses, countries, or URLs. Website is
-optional. Empty/null source values become empty strings. Missing fields use the
+optional. Returned blank/null values become empty strings; fields left out by Sugar
+become `null`. Missing fields use the
 original Sugar field names, in the order above. `schema_version` identifies the
 version of our response format, separate from Sugar's API version.
 
-An authenticated user must have record view access and read access to **all five**
-source fields, including optional `website`. A restricted field rejects the whole
-response with 403, before values are read or readiness is calculated. This is a
-deliberate choice to keep the success response the same for all allowed requests.
-If you leave out restricted fields instead, explain how that response works and
-protect any values calculated from those fields too.
+The endpoint extends `ModuleApi` and calls `parent::retrieveRecord()`. This uses
+Sugar’s existing argument checks, record loading, view access, and field filtering.
+Our code does not add its own ID pattern check or call the record/field permission
+methods directly. The standalone client also sends the ID without a GUID rule.
+
+Only values from the built-in API response are used. If Sugar leaves out a field,
+its summary value is `null`, meaning unavailable. If a required value is unavailable,
+`handoff.ready` and `handoff.missing_fields` are both `null`. A blank value that
+Sugar does return is still treated as blank. Website is optional: an unavailable
+website is `null` but does not prevent readiness when required values are present.
+
+`requireArgs()` checks for required arguments; it is not a general input cleaner.
+`retrieveBean()` loads a record; the API’s formatter applies field permissions.
+The custom summary reuses the complete built-in API path rather than reading raw
+bean properties or repeating those permission checks.
 
 ## Install in a sandbox
 
@@ -110,7 +120,7 @@ From the repository's main folder:
 ```sh
 php rest-api/examples/account_summary.php \
   --base https://YOUR-SUGAR/rest/v11 \
-  --record YOUR-ACCOUNT-GUID \
+  --record YOUR-ACCOUNT-ID \
   --username YOUR-TEST-USER
 ```
 
@@ -149,18 +159,19 @@ account data are included.
 | Valid visible Account, all source fields readable | 200; nested response                                  |
 | Required field blank                              | 200; `ready: false`, field listed in `missing_fields` |
 | Website blank, required fields populated          | 200; `website: ""`, `ready: true`                     |
-| Invalid GUID, with a valid token                  | 422; `invalid_parameter`                              |
-| Unknown GUID                                      | 404; `not_found`                                      |
+| Missing required argument (direct handler call)   | 422; `missing_parameter`                              |
+| Unknown record ID                                 | 404; `not_found`                                      |
 | Record denied by ACL                              | 403, or 404 if normal retrieval cannot see it         |
 | Account outside user's teams                      | No account data; ordinarily 404 at retrieval          |
-| Any source field denied by role                   | 403; no partial response or readiness                 |
+| Required source field omitted by built-in API     | 200; field value and handoff result are `null`        |
 | Missing/expired token                             | Authentication rejects request before handler runs    |
 
 Check HTTP status in your HTTP client or browser network tools. The PHP client
 reports non-2xx status and exits 1; it intentionally does not print error bodies.
-To test a malformed ID, use an HTTP client with a valid token: the PHP client
-rejects malformed GUIDs locally. Test missing authentication with an HTTP client
-that sends no token. Sugar's authentication error label/status can vary with the
+The client encodes the ID as one address segment and lets Sugar handle lookup;
+it does not enforce a GUID pattern. A missing record segment may fail route matching
+before the handler runs. Test missing authentication with an HTTP client that
+sends no token. Sugar's authentication error label/status can vary with the
 failure and authentication configuration; consult your instance's API help.
 
 ## Local checks and rebuild
@@ -172,8 +183,8 @@ php rest-api/tests/run.php
 php rest-api/tests/client.php
 ```
 
-The PHP endpoint tests use stand-ins for Sugar to check route setup, validation,
-retrieval arguments, permission denial, contract shape, and presence rules. The
+The PHP endpoint tests use a stand-in for `ModuleApi` to check our call to the
+built-in API, returned errors, response format, and missing or omitted values. The
 PHP client tests inspect outgoing requests without a network connection. They do not
 verify Sugar's real route discovery, OAuth, team security, Module Loader, or role
 engine. **Live Sugar installation and the scenario checks above remain required

@@ -55,9 +55,6 @@ foreach (['http://example.com/rest/v11', 'https://example.com', $base . '?token=
     $base . '#x', 'https://user@example.com/rest/v11', 'https://u:p@example.com/rest/v11'] as $invalid) {
     clientFailure(fn () => $client->fetch($invalid, $record), 'HTTPS API base');
 }
-foreach (['', '../Accounts', 'abc', $record . "\n"] as $invalid) {
-    clientFailure(fn () => $client->fetch($base, $invalid), 'Sugar GUID');
-}
 clientFailure(fn () => $client->fetch($base, $record, ''), 'cannot be blank');
 assertClient($calls === [] && $prompts === [], 'Invalid input must not request secrets or network');
 
@@ -89,6 +86,10 @@ assertClient($calls[0]['url'] === 'https://example.com/sugar/rest/v11/Accounts/'
     . rawurlencode('name,phone_office,website,billing_address_city,billing_address_country'), 'Built-in endpoint and fields');
 assertClient($calls[0]['headers'] === ['Accept: application/json', 'OAuth-Token: not-a-real-secret'], 'Existing token header');
 assertClient($prompts === ['OAuth access token: '], 'Token flow prompts once');
+
+$calls = [];
+$client->fetch($base, 'record/with spaces');
+assertClient($calls[0]['url'] === $base . '/SDG/Accounts/record%2Fwith%20spaces/summary', 'Encode record ID as one path value without a GUID rule');
 
 foreach (['', "token\r\nInjected: value", 'token with space'] as $badToken) {
     $calls = [];
