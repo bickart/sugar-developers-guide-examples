@@ -11,7 +11,7 @@ When Sugar's standard API does not return the output your integration needs,
 build a small endpoint with an explicit response contract.
 
 **[Start the account-summary tutorial](rest-api/README.md)** ·
-[View the endpoint](rest-api/custom/clients/base/api/SdgAccountSummaryApi.php) ·
+[View the endpoint](rest-api/custom/modules/Accounts/clients/base/api/SdgAccountSummaryApi.php) ·
 [Download the installable ZIP](rest-api/builds/sugardevelopersguiderestapiexamples_1.0.0.zip)
 
 ## Topics

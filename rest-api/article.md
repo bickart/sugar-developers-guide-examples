@@ -98,7 +98,11 @@ format.
 
 Create this file under your Sugar application folder:
 
-`custom/clients/base/api/SdgAccountSummaryApi.php`
+`custom/modules/Accounts/clients/base/api/SdgAccountSummaryApi.php`
+
+This endpoint belongs in the Accounts folder because it works only with Accounts.
+Use `custom/clients/base/api/` for global endpoints or services shared by several
+modules. The folder does not change the URL; `registerApiRest()` defines that.
 
 The PHP class and file have the same name. A class groups related code. Here,
 `SdgAccountSummaryApi` extends Sugar’s `ModuleApi` class, so it can reuse the

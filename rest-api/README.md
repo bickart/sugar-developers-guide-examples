@@ -8,7 +8,7 @@ custom modules, external services, or database changes.
 ## Start here
 
 - [Read the article](article.md).
-- [Open the complete endpoint](custom/clients/base/api/SdgAccountSummaryApi.php).
+- [Open the complete endpoint](custom/modules/Accounts/clients/base/api/SdgAccountSummaryApi.php).
 - [Open the platform registration](custom/Extension/application/Ext/Platforms/sdg_examples.php).
 - [Run the PHP client](examples/account_summary.php) (PHP 8.2 or later, with cURL).
 - [Download the installable ZIP](builds/sugardevelopersguiderestapiexamples_1.0.0.zip).
@@ -81,8 +81,17 @@ bean properties or repeating those permission checks.
 
 ## Install in a sandbox
 
+The endpoint lives under `custom/modules/Accounts/clients/base/api/` because it is
+specific to Accounts. Global endpoints belong under `custom/clients/base/api/`.
+The file location does not change the registered URL.
+
 Choose **one** installation method; do not install the ZIP and manually copy the
 same files. First confirm these uniquely named files do not already exist.
+
+If you installed an earlier draft of this example, uninstall that package first.
+If you copied the earlier file by hand, remove
+`custom/clients/base/api/SdgAccountSummaryApi.php` before copying the new file.
+Keep only one copy of the class so Sugar does not load it twice.
 
 ### Module Loader
 
@@ -100,8 +109,8 @@ From the repository root, copy only these two files into the matching paths unde
 your Sugar application root. Preserve existing unrelated files.
 
 ```text
-rest-api/custom/clients/base/api/SdgAccountSummaryApi.php
-  → custom/clients/base/api/SdgAccountSummaryApi.php
+rest-api/custom/modules/Accounts/clients/base/api/SdgAccountSummaryApi.php
+  → custom/modules/Accounts/clients/base/api/SdgAccountSummaryApi.php
 rest-api/custom/Extension/application/Ext/Platforms/sdg_examples.php
   → custom/Extension/application/Ext/Platforms/sdg_examples.php
 ```
