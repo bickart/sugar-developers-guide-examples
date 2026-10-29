@@ -5,7 +5,7 @@ Start with the [examples catalog](EXAMPLES.md) to find code, setup instructions,
 article links, and available downloads. Some topics are placeholders; the catalog
 identifies them explicitly.
 
-## Latest: Month 5 — Custom REST APIs
+## Accounts RestAPI Example
 
 When Sugar's standard API does not return the output your integration needs,
 build a small endpoint with an explicit response contract.
@@ -13,9 +13,9 @@ build a small endpoint with an explicit response contract.
 The endpoint uses a separate PHP service for its readiness rule. The example
 includes service unit tests and live integration tests for a Sugar sandbox.
 
-**[Start the account-summary tutorial](rest-api/README.md)** ·
+**[Open the Accounts RestAPI Example](rest-api/README.md)** ·
 [View the endpoint](rest-api/custom/modules/Accounts/clients/base/api/SdgAccountSummaryApi.php) ·
-[Download the installable ZIP](rest-api/builds/sugardevelopersguiderestapiexamples_1.0.0.zip)
+[Download the installable ZIP](rest-api/builds/sugardevelopersguideaccountsrestapiexample_1.0.0.zip)
 
 ## Topics
 
@@ -23,7 +23,7 @@ includes service unit tests and live integration tests for a Sugar sandbox.
 - [Vardefs](vardefs/README.md)
 - [Layouts and Views](layouts-and-views/README.md)
 - [Logic Hooks](logic-hooks/README.md)
-- [Custom REST APIs — account summary](rest-api/README.md)
+- [Accounts RestAPI Example](rest-api/README.md)
 - [Scheduler Jobs](scheduler-jobs/README.md)
 - [Installation](installation/README.md)
 

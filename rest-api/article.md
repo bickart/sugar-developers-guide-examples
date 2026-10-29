@@ -411,7 +411,7 @@ data.**
 
 ## Find all the example files
 
-Start at the [Month 5 guide](https://github.com/sugardevelopersguide/sugar-developers-guide-examples/tree/main/rest-api)
+Start at the [Accounts RestAPI Example](https://github.com/sugardevelopersguide/sugar-developers-guide-examples/tree/main/rest-api)
 for setup steps, a download, and direct links to each file. The
 [examples index](https://github.com/sugardevelopersguide/sugar-developers-guide-examples/blob/main/EXAMPLES.md)
 also lists earlier topics and shows which ones still need code.

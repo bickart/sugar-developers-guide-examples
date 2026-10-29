@@ -1,6 +1,6 @@
-# Custom REST API: Account Summary
+# Accounts RestAPI Example
 
-Month 5 answers Anand Tupe's request for custom endpoints when Sugar's standard
+The Accounts RestAPI Example answers Anand Tupe's request for custom endpoints when Sugar's standard
 API does not return the output an integration needs. This is an original example
 using only the built-in Accounts module and stock fields. It adds no custom
 modules, external services, or database changes.
@@ -12,7 +12,7 @@ modules, external services, or database changes.
 - [Open the readiness service](custom/modules/Accounts/Services/AccountReadinessService.php).
 - [Open the platform registration](custom/Extension/application/Ext/Platforms/sdg_examples.php).
 - [Run the PHP client](examples/account_summary.php) (PHP 8.2 or later, with cURL).
-- [Download the installable ZIP](builds/sugardevelopersguiderestapiexamples_1.0.0.zip).
+- [Download the installable ZIP](builds/sugardevelopersguideaccountsrestapiexample_1.0.0.zip).
 - [Review the service unit tests](tests/unit/AccountReadinessServiceTest.php),
   [endpoint checks](tests/run.php), [client tests](tests/client.php), and
   [live integration tests](tests/integration/AccountSummaryEndpointTest.php).
