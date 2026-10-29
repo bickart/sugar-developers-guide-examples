@@ -1,5 +1,13 @@
 # Contributor Instructions
 
+## Language for guide code
+
+Use PHP for Sugar Developers Guide code examples, client programs, tests, and
+supporting scripts. New standalone examples must support PHP 8.2 or later unless
+the target Sugar version requires a higher version. Do not use Python for this
+project unless the user explicitly approves it first. Keep existing Sugar browser
+code in its required language; this does not authorize Python.
+
 ## Reader-facing writing
 
 Write articles, guides, and the examples index in plain language at a ninth-grade

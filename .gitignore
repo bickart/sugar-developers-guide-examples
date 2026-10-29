@@ -2,4 +2,3 @@
 /node_modules/
 /.php-cs-fixer.cache
 /.idea
-__pycache__/

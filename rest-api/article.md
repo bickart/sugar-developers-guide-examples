@@ -20,10 +20,9 @@ organizations. Our example uses only fields already in that module.
 **[Get the code and setup guide](https://github.com/sugardevelopersguide/sugar-developers-guide-examples/tree/main/rest-api)**
 
 The GitHub repository is a shared folder of example files. It includes the complete
-PHP file, a small Python program to call it,
-an installable ZIP file, and tests. PHP is the language used for this part of
-Sugar. You can try the example in a sandbox—a test copy of Sugar—without adding
-a custom module.
+PHP endpoint, a PHP client program to call it, an installable ZIP file, and tests.
+You can try the example in a sandbox—a test copy of Sugar—without adding a custom
+module.
 
 ## Check the existing API first
 
@@ -241,17 +240,21 @@ business records.
 ## Call the endpoint
 
 Download the companion repository. Open a terminal (command window) in its main folder
-and run this command. You will need Python 3, with no extra libraries.
+and run this command. You will need PHP 8.2 or later with the cURL extension
+enabled. cURL is the PHP tool that sends web requests. No Composer packages are
+needed to run the client. Keep this program outside the Sugar application folder.
 
 ```sh
-python3 rest-api/examples/account_summary.py \
+php rest-api/examples/account_summary.php \
   --base https://YOUR-SUGAR/rest/v11_27 \
   --record YOUR-ACCOUNT-GUID \
   --username YOUR-TEST-USER
 ```
 
 Replace the site address, Account ID, and username with your test values. The
-program asks for your password without showing it on screen.
+program asks for your password. On macOS and Linux, it hides what you type.
+The setup guide explains how to supply a secret on Windows or when hidden input
+is not available.
 
 It uses Sugar’s OAuth 2.0 login process to get an access token. A token is a
 temporary value that proves the app has logged in. The program sends that value
@@ -300,11 +303,11 @@ An Account hidden by team rules may return 404 before the view check runs.
 Sugar handles missing or expired login tokens before this method runs.
 
 Use an HTTP client, such as Postman, to test missing tokens and IDs in the wrong
-format. The Python program checks ID format before sending a request and always
+format. The PHP program checks ID format before sending a request and always
 asks for a login or token.
 
 The repository includes tests for the example’s input checks, permission checks,
-response format, and missing-data rule. It also tests the Python requests without
+response format, and missing-data rule. It also checks requests from the PHP client without
 connecting to a server. These tests use stand-ins for Sugar. They do not prove
 that installation, login, or team rules work in a real Sugar system. **The example
 still needs a check in a real Sugar test system before use with business data.** It has not yet been

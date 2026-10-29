@@ -26,6 +26,9 @@ build a small endpoint with an explicit response contract.
 
 ## Development tools
 
+Guide examples and supporting scripts use PHP. The standalone REST client works
+with PHP 8.2 or later and cURL. The development tools below require PHP 8.4.
+
 ```sh
 composer install
 npm install

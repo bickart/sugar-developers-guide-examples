@@ -26,10 +26,10 @@ Month 5 needs only the built-in Accounts module and its fields.
 | Full article                                         | [When Sugar's REST API Doesn't Return What You Need](rest-api/article.md)                |
 | Route and handler                                    | [SdgAccountSummaryApi.php](rest-api/custom/clients/base/api/SdgAccountSummaryApi.php)    |
 | Dedicated OAuth platform                             | [sdg_examples.php](rest-api/custom/Extension/application/Ext/Platforms/sdg_examples.php) |
-| Stock API / custom API comparison client             | [account_summary.py](rest-api/examples/account_summary.py)                               |
+| Stock API / custom API comparison client             | [account_summary.php](rest-api/examples/account_summary.php)                             |
 | Installable Module Loader package                    | [Download ZIP](rest-api/builds/sugardevelopersguiderestapiexamples_1.0.0.zip)            |
 | Offline endpoint checks                              | [run.php](rest-api/tests/run.php)                                                        |
-| Offline HTTP client checks                           | [test_client.py](rest-api/tests/test_client.py)                                          |
+| Offline HTTP client checks                           | [client.php](rest-api/tests/client.php)                                                  |
 
 ## How to use the library
 

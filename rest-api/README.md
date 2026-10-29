@@ -10,9 +10,9 @@ custom modules, external services, or database changes.
 - [Read the article](article.md).
 - [Open the complete endpoint](custom/clients/base/api/SdgAccountSummaryApi.php).
 - [Open the platform registration](custom/Extension/application/Ext/Platforms/sdg_examples.php).
-- [Run the Python client](examples/account_summary.py) (Python 3, no extra packages).
+- [Run the PHP client](examples/account_summary.php) (PHP 8.2 or later, with cURL).
 - [Download the installable ZIP](builds/sugardevelopersguiderestapiexamples_1.0.0.zip).
-- [Review the isolated endpoint tests](tests/run.php) and [client tests](tests/test_client.py).
+- [Review the isolated endpoint tests](tests/run.php) and [client tests](tests/client.php).
 - [Browse all examples](../EXAMPLES.md).
 
 ## Terms used in this guide
@@ -26,7 +26,7 @@ custom modules, external services, or database changes.
 - A **sandbox** is a test copy of Sugar. A **module** is a group of one record type.
 - An **OAuth access token** is a temporary value that proves an app has logged in.
   A **platform** is a name used to identify the app when it logs in.
-- **PHP** is the language used for the endpoint. The Python client is a separate
+- **PHP** is the language used for the endpoint. The PHP client is a separate
   program that sends requests to it. Run commands in a terminal (command window).
 
 ## Response format
@@ -100,10 +100,14 @@ under Sugar's public application directory.
 
 ## Make a request
 
+Use PHP 8.2 or later with the cURL extension enabled. cURL is the PHP tool that
+sends web requests. You do not need Composer or any extra packages to run this
+client. Run it on your own computer, outside the Sugar application.
+
 From the repository's main folder:
 
 ```sh
-python3 rest-api/examples/account_summary.py \
+php rest-api/examples/account_summary.php \
   --base https://YOUR-SUGAR/rest/v11_27 \
   --record YOUR-ACCOUNT-GUID \
   --username YOUR-TEST-USER
@@ -113,6 +117,14 @@ Replace all three placeholders. The client prompts for a password, authenticates
 with the registered `sdg_examples` platform, then calls the summary using the
 `OAuth-Token` header. It keeps tokens in memory and prints only the record response.
 It requires HTTPS and refuses redirects. Use your canonical Sugar URL.
+
+On macOS and Linux, the client hides typed passwords and tokens with the `stty`
+terminal tool. On Windows, or where that tool is not available, pass the secret
+through standard input from a trusted password tool or a protected local file.
+Standard input is data sent to a command by another command or a file. Do not put
+secrets in command arguments, shell history, or committed files. If you interrupt
+a hidden prompt and your terminal stops showing text, run `stty echo` to restore
+normal input display.
 
 For SugarIdentity, single sign-on (SSO), or other login rules that do not permit this
 password flow, obtain an access token through your supported flow and omit
@@ -143,9 +155,9 @@ account data are included.
 | Any source field denied by role                   | 403; no partial response or readiness                 |
 | Missing/expired token                             | Authentication rejects request before handler runs    |
 
-Check HTTP status in your HTTP client or browser network tools. The Python client
+Check HTTP status in your HTTP client or browser network tools. The PHP client
 reports non-2xx status and exits 1; it intentionally does not print error bodies.
-To test a malformed ID, use an HTTP client with a valid token: the Python client
+To test a malformed ID, use an HTTP client with a valid token: the PHP client
 rejects malformed GUIDs locally. Test missing authentication with an HTTP client
 that sends no token. Sugar's authentication error label/status can vary with the
 failure and authentication configuration; consult your instance's API help.
@@ -156,16 +168,21 @@ No Sugar installation is required for these tests. They use stand-ins for Sugar:
 
 ```sh
 php rest-api/tests/run.php
-python3 -m unittest discover -s rest-api/tests -p 'test_*.py'
+php rest-api/tests/client.php
 ```
 
-The PHP tests use explicit Sugar doubles to check route metadata, validation,
+The PHP endpoint tests use stand-ins for Sugar to check route setup, validation,
 retrieval arguments, permission denial, contract shape, and presence rules. The
-Python tests inspect outgoing requests without a network connection. They do not
+PHP client tests inspect outgoing requests without a network connection. They do not
 verify Sugar's real route discovery, OAuth, team security, Module Loader, or role
 engine. **Live Sugar installation and the scenario checks above remain required
 before production use or a claim of runtime compatibility.** Target: Sugar 26.1,
 API v11_27. No live Sugar execution was available when this example was authored.
+
+The standalone client and its tests use PHP 8.2-compatible code. The repository's
+development tools need PHP 8.4, as listed in `composer.json`. That higher version
+is needed to run the formatters, not to run this client. Keep using the PHP version
+supported by your Sugar server for the endpoint itself.
 
 Rebuild the topic package from the repository root with a new version number:
 
