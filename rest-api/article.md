@@ -110,12 +110,6 @@ This is the full endpoint. The same code is available as a file in the repositor
 ```php
 <?php
 
-if (!defined('sugarEntry') || !sugarEntry) {
-    die('Not A Valid Entry Point');
-}
-
-require_once 'clients/base/api/ModuleApi.php';
-
 /** Original tutorial example using only stock Accounts fields. */
 class SdgAccountSummaryApi extends ModuleApi
 {

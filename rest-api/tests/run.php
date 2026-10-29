@@ -12,8 +12,7 @@
  */
 
 // Test only the custom mapping. Sugar's own retrieval is represented by a double.
-define('sugarEntry', true);
-set_include_path(__DIR__ . '/fixtures' . PATH_SEPARATOR . get_include_path());
+require __DIR__ . '/fixtures/clients/base/api/ModuleApi.php';
 require dirname(__DIR__) . '/custom/clients/base/api/SdgAccountSummaryApi.php';
 
 function check(bool $condition, string $message): void

@@ -11,12 +11,6 @@
  * permission, please contact the copyright holders and delete this file.
  */
 
-if (!defined('sugarEntry') || !sugarEntry) {
-    die('Not A Valid Entry Point');
-}
-
-require_once 'clients/base/api/ModuleApi.php';
-
 /** Original tutorial example using only stock Accounts fields. */
 class SdgAccountSummaryApi extends ModuleApi
 {
