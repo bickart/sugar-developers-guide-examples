@@ -15,7 +15,7 @@ includes service unit tests and live integration tests for a Sugar sandbox.
 
 **[Open the Accounts RestAPI Example](rest-api/README.md)** ·
 [View the endpoint](rest-api/custom/modules/Accounts/clients/base/api/SdgAccountSummaryApi.php) ·
-[Download the installable ZIP](rest-api/builds/sugardevelopersguideaccountsrestapiexample_1.0.0.zip)
+[Download the installable ZIP](rest-api/builds/sugardevelopersguideaccountsrestapiexample_1.0.1.zip)
 
 ## Topics
 

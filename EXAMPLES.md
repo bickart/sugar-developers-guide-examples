@@ -10,7 +10,7 @@ repository cannot be installed through Module Loader.
 | Use extension points                 | [Extension Framework](extension-framework/README.md) | Extension and custom-field snippets; [topic ZIP](extension-framework/builds/sugardevelopersguideextensionframeworkexamples_26.7.0.zip)                          |
 | Define and override fields           | [Vardefs](vardefs/README.md)                         | Vardef and language snippets; [topic ZIP](vardefs/builds/sugardevelopersguidevardefsexamples_26.7.0.zip)                                                        |
 | Respond to saves and other events    | [Logic Hooks](logic-hooks/README.md)                 | Topic placeholder; no implementation files yet                                                                                                                  |
-| Return a tailored API response       | [Accounts RestAPI Example](rest-api/README.md)       | Endpoint, readiness service, PHP client, article, unit and integration tests; [topic ZIP](rest-api/builds/sugardevelopersguideaccountsrestapiexample_1.0.0.zip) |
+| Return a tailored API response       | [Accounts RestAPI Example](rest-api/README.md)       | Endpoint, readiness service, PHP client, article, unit and integration tests; [topic ZIP](rest-api/builds/sugardevelopersguideaccountsrestapiexample_1.0.1.zip) |
 | Run background work                  | [Scheduler Jobs](scheduler-jobs/README.md)           | Topic placeholder; no implementation files yet                                                                                                                  |
 | Configure a development installation | [Installation](installation/README.md)               | Silent-install configuration example                                                                                                                            |
 
@@ -28,7 +28,7 @@ The Accounts RestAPI Example needs only the built-in Accounts module and its fie
 | Field definitions and readiness rule                 | [AccountReadinessService.php](rest-api/custom/modules/Accounts/Services/AccountReadinessService.php)   |
 | Dedicated OAuth platform                             | [sdg_examples.php](rest-api/custom/Extension/application/Ext/Platforms/sdg_examples.php)               |
 | Stock API / custom API comparison client             | [account_summary.php](rest-api/examples/account_summary.php)                                           |
-| Installable Module Loader package                    | [Download ZIP](rest-api/builds/sugardevelopersguideaccountsrestapiexample_1.0.0.zip)                   |
+| Installable Module Loader package                    | [Download ZIP](rest-api/builds/sugardevelopersguideaccountsrestapiexample_1.0.1.zip)                   |
 | Offline endpoint checks                              | [run.php](rest-api/tests/run.php)                                                                      |
 | Service unit tests                                   | [AccountReadinessServiceTest.php](rest-api/tests/unit/AccountReadinessServiceTest.php)                 |
 | Live integration tests                               | [AccountSummaryEndpointTest.php](rest-api/tests/integration/AccountSummaryEndpointTest.php)            |

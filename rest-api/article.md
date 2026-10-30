@@ -24,6 +24,10 @@ PHP endpoint, a PHP client program to call it, an installable ZIP file, and test
 You can try the example in a sandbox—a test copy of Sugar—without adding a custom
 module.
 
+The examples use the repository's [MIT license](https://github.com/sugardevelopersguide/sugar-developers-guide-examples/blob/main/LICENSE).
+You may use, copy, and adapt the code. Keep the copyright and license notice with
+copies or substantial parts of the code.
+
 ## Check the existing API first
 
 You may not need a new endpoint. Sugar’s built-in API can return selected fields,

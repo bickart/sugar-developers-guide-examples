@@ -17,23 +17,13 @@ unneeded jargon. Spell out unfamiliar acronyms and explain needed technical term
 when they first appear. Use neutral examples and clear international formats.
 Keep code identifiers exact; explain their meaning in the surrounding prose.
 
-## Copyright notice
+## Copyright and license
 
-Every newly created source file must begin with the following copyright notice,
-adapted to the language's comment syntax:
-
-```text
-Copyright (C) Amaiza LLC. - All Rights Reserved
-
-This source code is proprietary and confidential and protected under
-international copyright law. All rights reserved and protected by
-the copyright holders. This file is only available to authorized individuals
-with the permission of the copyright holders. Unauthorized copying of this file,
-via any medium is strictly prohibited. If you encounter this file and do not have
-permission, please contact the copyright holders and delete this file.
-```
-
-Do not change existing files solely to add this notice unless explicitly asked.
+Original guide examples and supporting scripts use the repository's MIT license.
+New source files should include a short copyright line for Sugar Developers Guide
+and `SPDX-License-Identifier: MIT`, adapted to the language's comment syntax.
+Do not add proprietary, confidential, or copying-prohibited notices to public
+tutorial code. Preserve existing third-party copyright and license notices.
 
 ## Required validation for code changes
 

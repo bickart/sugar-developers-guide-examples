@@ -5,6 +5,10 @@ API does not return the output an integration needs. This is an original example
 using only the built-in Accounts module and stock fields. It adds no custom
 modules, external services, or database changes.
 
+The example uses the repository's [MIT license](../LICENSE). You may use, copy,
+and adapt the code. Keep the copyright and license notice with copies or
+substantial parts of the code.
+
 ## Start here
 
 - [Read the article](article.md).
@@ -12,7 +16,7 @@ modules, external services, or database changes.
 - [Open the readiness service](custom/modules/Accounts/Services/AccountReadinessService.php).
 - [Open the platform registration](custom/Extension/application/Ext/Platforms/sdg_examples.php).
 - [Run the PHP client](examples/account_summary.php) (PHP 8.2 or later, with cURL).
-- [Download the installable ZIP](builds/sugardevelopersguideaccountsrestapiexample_1.0.0.zip).
+- [Download the installable ZIP](builds/sugardevelopersguideaccountsrestapiexample_1.0.1.zip).
 - [Review the service unit tests](tests/unit/AccountReadinessServiceTest.php),
   [endpoint checks](tests/run.php), [client tests](tests/client.php), and
   [live integration tests](tests/integration/AccountSummaryEndpointTest.php).
@@ -273,7 +277,7 @@ supported by your Sugar server for the endpoint itself.
 Rebuild the topic package from the repository root with a new version number:
 
 ```sh
-php bin/pack.php rest-api 1.0.1
+php bin/pack.php rest-api 1.0.2
 ```
 
 Only `custom/` files and the repository license are included by the existing
