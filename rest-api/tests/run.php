@@ -37,7 +37,7 @@ $record = [
 ModuleApi::$response = $record;
 $invoke = fn ($args) => $api->getAccountSummary(null, $args);
 $result = $invoke(['record' => $id, 'module' => 'Contacts', 'fields' => ['description']]);
-check(ModuleApi::$calls === [[null, ['record' => $id, 'module' => 'Accounts', 'fields' => $fields]]], 'Delegate to built-in record API with fixed module and fields');
+check(ModuleApi::$calls === [[null, ['record' => $id, 'module' => 'Accounts', 'fields' => implode(',', $fields)]]], 'Delegate to built-in record API with fixed module and comma-separated fields');
 check($result === [
     'schema_version' => 1,
     'account' => ['id' => $id, 'name' => 'Example Account'],
@@ -51,7 +51,7 @@ foreach ([[], ['record' => 'example-record-id'], ['record' => '']] as $args) {
     $invoke($args);
     $expected = $args;
     $expected['module'] = 'Accounts';
-    $expected['fields'] = $fields;
+    $expected['fields'] = implode(',', $fields);
     check(end(ModuleApi::$calls) === [null, $expected], 'No custom GUID format rule or replacement record');
 }
 foreach (['missing argument', 'record not found', 'record access denied'] as $message) {

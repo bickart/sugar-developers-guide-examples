@@ -3,11 +3,9 @@
 Create a custom Sugar endpoint that returns data in the format your app needs.
 
 I [asked on LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7509297833817100288/) which code examples would help Sugar developers. [Anand Tupe](https://www.linkedin.com/in/anand-tupe-300264112/)
-chose REST APIs. I asked whether he wanted to use Sugar’s existing API or build
-new endpoints.
-
-He wanted to build endpoints when Sugar’s API does not return the output an app
-needs. Thanks, Anand. This post works through that problem from start to finish.
+asked for REST APIs, specifically new endpoints when Sugar’s API does not return
+what an app needs. Thanks, Anand. This post works through that problem from start
+to finish.
 
 An API (application programming interface) lets one program ask another for data
 or an action. REST (Representational State Transfer) is a common approach to
@@ -38,13 +36,10 @@ Our example reads five fields: `name`, `phone_office`, `website`,
 `billing_address_city`, and `billing_address_country`. Sugar’s existing API can
 already return all five.
 
-So why add an endpoint? Suppose several apps need the same account summary. Each
-app expects contact and billing details in separate groups. Each also needs to
-know whether the account has enough data to pass to the next step in a process.
-
-We can put that format and rule in Sugar. Then each app gets the same answer.
-This is a choice about where the rule belongs. It is not a limit on Sugar’s
-ability to return the fields.
+So why add an endpoint? Suppose several apps need the same account summary, with
+contact and billing details in separate groups. Each app also needs to know whether
+the Account has enough data for the next step. Putting that format and rule in
+Sugar gives every app the same answer.
 
 ## Decide what the response should contain
 
@@ -84,13 +79,11 @@ value or group.
 
 These are made-up values. You will use an Account from your test system.
 
-The `handoff` group says whether the Account can pass to the next step. For this
-example, `ready` is true when the name, office phone, billing city, and billing
-country are not blank. Spaces at the start and end do not count as data. Website
-is optional.
-
-This is a simple check for missing data. It does not check whether a phone number,
-web address, or postal address is correct. Change the rule to suit your process.
+The `handoff` group says whether the Account can pass to the next step. `ready` is
+true when the name, office phone, billing city, and billing country contain data
+other than spaces. Website is optional. This checks only for missing data; it does
+not check whether a phone number, web address, or postal address is correct.
+Change the rule to suit your process.
 
 `missing_fields` lists the Sugar field names that need data. An empty list means
 none of the required values are missing. `schema_version` is our response format’s
@@ -108,10 +101,9 @@ Create this file:
 
 `custom/modules/Accounts/Services/AccountReadinessService.php`
 
-It has one field-definition array. Each key is a Sugar field name. Its `required`
-setting is boolean `true` or `false`, without quotes. There is no need to repeat
-the name in a `field` property. This rule does not change Sugar's own required-field
-settings.
+`FIELD_DEFINITIONS` maps each Sugar field name to a `required` setting: boolean
+`true` or `false`, without quotes. Each field name appears once. This readiness
+rule is separate from Sugar’s own required-field settings.
 
 ```php
 <?php
@@ -179,8 +171,8 @@ Create this file under your Sugar application folder:
 `custom/modules/Accounts/clients/base/api/SdgAccountSummaryApi.php`
 
 This endpoint belongs in the Accounts folder because it works only with Accounts.
-Use `custom/clients/base/api/` for global endpoints or services shared by several
-modules. The folder does not change the URL; `registerApiRest()` defines that.
+Use `custom/clients/base/api/` for endpoints not tied to one module. The folder
+does not change the URL; `registerApiRest()` defines that.
 
 The PHP class and file have the same name. A class groups related code. Here,
 `SdgAccountSummaryApi` extends Sugar’s `ModuleApi` class, so it can reuse the
@@ -216,7 +208,7 @@ class SdgAccountSummaryApi extends ModuleApi
         $service = new AccountReadinessService();
         $fields = $service->getFieldNames();
         $args['module'] = 'Accounts';
-        $args['fields'] = $fields;
+        $args['fields'] = implode(',', $fields);
         $data = parent::retrieveRecord($api, $args);
 
         // Use only the data returned by Sugar's standard record API.
@@ -253,13 +245,15 @@ Next, the API asks the service which fields it needs. We fix the module to
 Accounts and select those fields. The caller cannot change that selection. `parent::retrieveRecord()` then calls the
 built-in `ModuleApi` method. It checks required arguments, loads the record,
 checks view access, and formats the response using Sugar’s field permissions.
+`implode(',', $fields)` joins the field names into the comma-separated form used
+in a normal REST request.
 
 `requireArgs()` checks that arguments are present. It is not a general tool for
 cleaning or changing every input value. We use the same record-loading path as
 Sugar’s built-in API and do not add a separate GUID format rule. A GUID (globally
 unique identifier) is the type of ID Sugar normally creates for a record.
 
-There is a useful distinction here. `BeanFactory::retrieveBean()` loads a bean,
+`BeanFactory::retrieveBean()` loads a bean,
 which is Sugar’s code object for a record. It does not format a safe API response
 by itself. `ModuleApi::retrieveRecord()` also applies the record and field rules
 needed for that response. Our summary uses only the data that method returns.
@@ -269,6 +263,8 @@ is not available; it does not mean the field is blank. If a required value is no
 available, both `ready` and `missing_fields` are `null`. We cannot decide whether
 that Account is ready from the data we received. A website left out by Sugar
 remains `null`, but does not affect readiness because website is optional.
+A visible blank value is returned as `""`, an empty string. A visible value made
+only of spaces is also returned as `""`.
 
 This keeps permission handling in Sugar’s standard code. The API groups the
 allowed values. The service applies the missing-data rule to that same returned
@@ -289,8 +285,8 @@ listed in the guide instead. Choose one install method. Keep the article, client
 program, and tests outside Sugar’s public application folder.
 
 Open `/rest/v11/help` on your Sugar site and look for the SDG summary address.
-If it is missing, use Rebuild API Metadata in Admin → Repair, where available.
-That rebuild updates Sugar’s list of API endpoints.
+Quick Repair and Rebuild clears Sugar’s cached list of API endpoints. If the
+address is missing, check the file paths and class name, then run that repair again.
 
 The setup guide also explains how to remove the example. It adds no fields or
 business records.
@@ -353,18 +349,18 @@ The endpoint uses Sugar’s built-in error classes. An error class tells Sugar
 which response to send. A web response includes an HTTP status code: a number
 that says whether the request worked.
 
-| Result                        | Status | Error class                         |
-| ----------------------------- | ------ | ----------------------------------- |
-| A required argument is absent | 422    | `SugarApiExceptionMissingParameter` |
-| Account not found             | 404    | `SugarApiExceptionNotFound`         |
-| Record access denied          | 403    | `SugarApiExceptionNotAuthorized`    |
+| Result               | Status | Error class                      |
+| -------------------- | ------ | -------------------------------- |
+| Account not found    | 404    | `SugarApiExceptionNotFound`      |
+| Record access denied | 403    | `SugarApiExceptionNotAuthorized` |
 
-An Account hidden by team rules may return 404 before the view check runs.
+When team security hides an Account from normal retrieval, Sugar returns 404
+before the view check runs.
 Sugar handles missing or expired login tokens before this method runs.
 
-Neither our endpoint nor the PHP client requires a GUID-shaped ID. The client
-encodes the ID as one part of the address and lets Sugar handle the lookup. To
-test missing authentication, use an HTTP client, such as Postman, without a token.
+The Account ID is part of the address. If it is absent, the request does not match
+this route and does not reach our method. To test missing authentication, use an
+HTTP client, such as Postman, without a token.
 
 ## Add unit and integration tests
 

@@ -29,7 +29,7 @@ class SdgAccountSummaryApi extends ModuleApi
         $service = new AccountReadinessService();
         $fields = $service->getFieldNames();
         $args['module'] = 'Accounts';
-        $args['fields'] = $fields;
+        $args['fields'] = implode(',', $fields);
         $data = parent::retrieveRecord($api, $args);
 
         // Use only the data returned by Sugar's standard record API.
