@@ -102,7 +102,7 @@ Create this file:
 `custom/modules/Accounts/Services/AccountReadinessService.php`
 
 `FIELD_DEFINITIONS` maps each Sugar field name to a `required` setting: boolean
-`true` or `false`, without quotes. Each field name appears once. This readiness
+`true` or `false`, without quotes. This readiness
 rule is separate from Sugar’s own required-field settings.
 
 ```php
