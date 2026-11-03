@@ -5,29 +5,19 @@
  * SPDX-License-Identifier: MIT
  */
 
-// Sugar builds each admin panel section with its own $admin_option_defs array.
+// Start the links for this section, then append the section below.
 $admin_option_defs = [];
 
-$admin_option_defs['Amaiza']['amaiza_Substack_Launcher'] = [
-    // Legacy BWC icon image name, without the .gif extension.
+$admin_option_defs['Administration']['amaiza_Substack_Launcher'] = [
+    // Legacy icon name; check icon appearance in the target Sugar release.
     'Administration',
-
-    // Sidecar icon class.
-    'icon' => 'sicon-process-definitions-lg',
 
     // Link title and description label keys.
     'LBL_AMAIZA_SUBSTACK_LAUNCHER_TITLE',
     'LBL_AMAIZA_SUBSTACK_LAUNCHER_DESC',
 
-    // Link URL.
+    // External website. This does not publish content or sign the user in.
     'https://substack.com',
-
-    // Optional warning flag and onclick handler.
-    null,
-    null,
-
-    // Open the link in a new tab.
-    '_blank',
 ];
 
 $admin_group_header[] = [

@@ -6,7 +6,8 @@
  */
 
 $app_list_strings['contact_priority_list'] = [
+    '' => '',
     'low' => 'Low',
-    'medium' => 'Medium',
+    'normal' => 'Normal',
     'high' => 'High',
 ];

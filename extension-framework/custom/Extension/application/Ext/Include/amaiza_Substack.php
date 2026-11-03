@@ -5,6 +5,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-$beanList['amaiza_Substack'] = 'amaiza_Substack';
-$beanFiles['amaiza_Substack'] = 'modules/amaiza_Substack/amaiza_Substack.php';
-$modules_exempt_from_availability_check['amaiza_Substack'] = 'amaiza_Substack';
+// Registration alone does not create a module. Its class must already exist.
+if (is_file('modules/amaiza_Substack/amaiza_Substack.php')) {
+    $beanList['amaiza_Substack'] = 'amaiza_Substack';
+    $beanFiles['amaiza_Substack'] = 'modules/amaiza_Substack/amaiza_Substack.php';
+    $moduleList[] = 'amaiza_Substack';
+}
