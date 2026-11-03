@@ -28,6 +28,9 @@ Date: 2026-11-02. Installed correction: 26.7.2.
   through the QA job launcher. It reached failure, and the Sugar log
   contained the hook's exact final-failure message. This confirms that the
   installed hook class loaded and ran.
+- QA's Module Names and Icons screen listed 96 registered modules and no
+  `amaiza_Substack` entry. This confirms the missing example module is not
+  exposed in that screen. It does not directly inspect server-side bean arrays.
 
 ## Logger correction found during live testing
 
@@ -44,22 +47,26 @@ of the isolated inactive scheduler produced the exact final-failure message at
 WARN severity. The threshold was restored to Fatal and verified on the settings
 page. No other logger settings were changed.
 
-## Live tests still pending
+## Repair limitation
 
 The initial empty embedded pages were a loading delay, not a confirmed Module
 Loader or Studio failure. Module Loader later loaded and installation completed.
 
 Quick Repair and Rebuild reported Token Expired and returned to the login form
 at 81%. The same result occurred after signing in again and making one further
-repair attempt. No more repair attempts were made. Its completion and database
-comparison results have not been confirmed. No generated SQL was manually
-executed. The checks below remain open; do not repeat repair solely to rerun
-the field and logging checks:
-
-1. Inspect the Quick Repair and Rebuild result and any proposed database changes.
-2. Confirm the guarded module fragment does not register a missing module.
+repair attempt. A later check through the direct repair page returned to
+Administration without a repair summary. Completion and database comparison
+results remain unverified. No generated SQL was manually executed. Do not
+repeat repair solely to rerun the field and logging checks.
 
 The test scheduler remains inactive. No existing scheduler was launched or edited.
 
-The source checks do not replace these live tests. The pull request remains a
-draft until the live-test blocker is resolved.
+The source checks do not replace a completed database comparison. The pull
+request remains a draft because that QA result is unavailable.
+
+## Article publication
+
+The user approved publication on 2026-11-02. The updated article is live at
+[The Extension Framework Explained](https://sugardevelopersguide.substack.com/p/the-extension-framework-explained).
+The public page was checked for the architecture graphic, optional field
+definition, guarded module fragment, and corrected `warn()` call.
