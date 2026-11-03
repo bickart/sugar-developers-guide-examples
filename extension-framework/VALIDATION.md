@@ -1,6 +1,6 @@
 # Extension Framework validation
 
-Date: 2026-11-02. Installed package: 26.7.1. Corrected package: 26.7.2.
+Date: 2026-11-02. Installed correction: 26.7.2.
 
 ## Passed
 
@@ -25,7 +25,7 @@ Date: 2026-11-02. Installed package: 26.7.1. Corrected package: 26.7.2.
   `contact_priority_list`, with a blank default and blank, Low, Normal, and High
   choices.
 - An isolated inactive scheduler using a reserved `.invalid` URL was launched
-  once through the QA job launcher. It reached failure, and the Sugar log
+  through the QA job launcher. It reached failure, and the Sugar log
   contained the hook's exact final-failure message. This confirms that the
   installed hook class loaded and ran.
 
@@ -36,10 +36,13 @@ logger level, so Sugar used its configured level instead; QA recorded the test
 message as Fatal. Version 26.7.2 changes the call to `warn()`.
 
 The source check now uses Sugar's real legacy logger dispatch with an isolated
-output sink. It failed with `warning()` and passed with `warn()`. QA's logger is
-currently set to Fatal, which filters out a correct Warn message. Live validation
-of 26.7.2 requires installing the correction and temporarily using a Warn
-threshold, then restoring Fatal.
+output sink. It failed with `warning()` and passed with `warn()`.
+
+After approval, Module Loader reported that 26.7.2 installed successfully. The
+QA log threshold was temporarily changed from Fatal to Warn. One further launch
+of the isolated inactive scheduler produced the exact final-failure message at
+WARN severity. The threshold was restored to Fatal and verified on the settings
+page. No other logger settings were changed.
 
 ## Live tests still pending
 
@@ -54,9 +57,7 @@ executed. The checks below remain open; do not repeat repair solely to rerun
 the field and logging checks:
 
 1. Inspect the Quick Repair and Rebuild result and any proposed database changes.
-2. Install 26.7.2 and confirm a final failed job writes at Warn severity, with
-   an appropriate log threshold. Restore the original threshold afterward.
-3. Confirm the guarded module fragment does not register a missing module.
+2. Confirm the guarded module fragment does not register a missing module.
 
 The test scheduler remains inactive. No existing scheduler was launched or edited.
 
