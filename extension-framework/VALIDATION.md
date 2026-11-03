@@ -1,6 +1,6 @@
 # Extension Framework validation
 
-Date: 2026-11-02. Package: 26.7.1.
+Date: 2026-11-02. Installed package: 26.7.1. Corrected package: 26.7.2.
 
 ## Passed
 
@@ -16,24 +16,49 @@ Date: 2026-11-02. Package: 26.7.1.
 - Composer and npm formatting checks, ESLint, and PHP syntax checks.
 - The user-provided QA instance reports Sugar Enterprise 26.1.0, build 319, on
   its About page after administrator sign-in.
+- Module Loader installed package 26.7.1. The installed-package row shows
+  Uninstall and Disable controls, confirming that the package is enabled.
+- The Administration section displays its heading, description, and Open
+  Substack link. Activating the link opens `https://substack.com/`.
+- Contacts Studio lists `custom_priority_c` as Support Priority, type DropDown.
+  Required Field and Mass Update are both unchecked. Its dropdown list is
+  `contact_priority_list`, with a blank default and blank, Low, Normal, and High
+  choices.
+- An isolated inactive scheduler using a reserved `.invalid` URL was launched
+  once through the QA job launcher. It reached failure, and the Sugar log
+  contained the hook's exact final-failure message. This confirms that the
+  installed hook class loaded and ran.
 
-## Live tests blocked
+## Logger correction found during live testing
 
-Module Loader opened as an empty embedded page. It remained empty after a fresh
-Administration load and a second attempt. Opening the observed frame URL directly
-returned to Administration. Studio also opened as an empty embedded page.
+The 26.7.1 hook called `warning()` on Sugar's legacy logger. This is not a legacy
+logger level, so Sugar used its configured level instead; QA recorded the test
+message as Fatal. Version 26.7.2 changes the call to `warn()`.
 
-No package was uploaded or installed. No database changes or repairs were run.
-The following checks are still required on a working test instance:
+The source check now uses Sugar's real legacy logger dispatch with an isolated
+output sink. It failed with `warning()` and passed with `warn()`. QA's logger is
+currently set to Fatal, which filters out a correct Warn message. Live validation
+of 26.7.2 requires installing the correction and temporarily using a Warn
+threshold, then restoring Fatal.
 
-1. Install package 26.7.1 with Module Loader.
-2. Run Quick Repair and Rebuild and inspect its database changes.
-3. Confirm the Support Priority field in Contacts Studio, with blank, Low, Normal,
-   and High choices and an optional field requirement.
-4. Confirm the Administration section, translated labels, and external link.
-5. Confirm Sugar's class autoloader loads the hook and a final failed job writes
-   the warning. A retryable failure should use `job_failure_retry` instead.
-6. Confirm the guarded module fragment does not register a missing module.
+## Live tests still pending
+
+The initial empty embedded pages were a loading delay, not a confirmed Module
+Loader or Studio failure. Module Loader later loaded and installation completed.
+
+Quick Repair and Rebuild reported Token Expired and returned to the login form
+at 81%. The same result occurred after signing in again and making one further
+repair attempt. No more repair attempts were made. Its completion and database
+comparison results have not been confirmed. No generated SQL was manually
+executed. The checks below remain open; do not repeat repair solely to rerun
+the field and logging checks:
+
+1. Inspect the Quick Repair and Rebuild result and any proposed database changes.
+2. Install 26.7.2 and confirm a final failed job writes at Warn severity, with
+   an appropriate log threshold. Restore the original threshold afterward.
+3. Confirm the guarded module fragment does not register a missing module.
+
+The test scheduler remains inactive. No existing scheduler was launched or edited.
 
 The source checks do not replace these live tests. The pull request remains a
 draft until the live-test blocker is resolved.

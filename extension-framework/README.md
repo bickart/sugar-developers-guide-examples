@@ -29,6 +29,9 @@ The hook runs when a job fails for the final time. Its method accepts the job
 bean, event name, and arguments array. Despite its method name, this example
 only logs a warning; it does not send email. Use `job_failure_retry` to handle
 failures that will be retried.
+The example uses the legacy Sugar logger's `warn()` method. A logger threshold
+of Warn, Info, or Debug is needed to see the message. A Fatal threshold filters
+it out. PSR-3 loggers use a different method name, `warning()`.
 
 The dropdown definition includes a blank choice that matches the field's empty
 default. Its other choices are Low, Normal, and High.
@@ -51,15 +54,15 @@ Build an installable archive from this example's `custom/` sources and Contact
 Priority package metadata:
 
 ```sh
-php bin/pack.php extension-framework 26.7.1
+php bin/pack.php extension-framework 26.7.2
 ```
 
 The archive is written to `extension-framework/builds/`. Its package version is
 the supplied argument and it accepts Sugar 26.x Enterprise, Professional, and
 Ultimate installations.
 
-Version 26.7.1 includes the article corrections. The older 26.7.0 archive is
-retained for reference. Package compatibility declarations are not a record of
+Version 26.7.2 also corrects the legacy logger method. Versions 26.7.0 and 26.7.1
+are retained for reference. Package compatibility declarations are not a record of
 testing on every accepted Sugar release. Validate the package on a development
 instance before using it elsewhere.
 
@@ -72,10 +75,12 @@ php extension-framework/verify-sugar-source.php /path/to/Sugar
 ```
 
 The check uses Sugar's real enum-field conversion, Administration metadata parser,
-and logic-hook scanner. It does not connect to a database or change the Sugar
-source tree. Theme lookup and log output use test replacements. The hook class is
+and logic-hook scanner. It also checks severity dispatch through Sugar's real
+legacy logger. It does not connect to a database or change the Sugar source tree.
+Theme lookup and log output use test replacements. The hook class is
 loaded directly, so this does not test Sugar's class autoloader.
 
 These checks passed against Sugar Enterprise 26.1.0 with PHP 8.4.26 on 2026-11-02.
-A configured test instance is still required to verify Module Loader installation,
-Quick Repair and Rebuild, Studio, the Administration page, and a final failed job.
+Package installation and the Administration section were also checked on a Sugar
+Enterprise 26.1.0 QA instance. See [VALIDATION.md](VALIDATION.md) for the results
+and the remaining repair and corrected logging checks.

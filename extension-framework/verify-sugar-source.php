@@ -29,6 +29,7 @@ require 'modules/DynamicFields/templates/Fields/TemplateField.php';
 require 'modules/DynamicFields/templates/Fields/TemplateText.php';
 require 'modules/DynamicFields/templates/Fields/TemplateEnum.php';
 require 'include/utils/LogicHook.php';
+require 'include/SugarLogger/LoggerManager.php';
 
 function verifySource(bool $condition, string $message): void
 {
@@ -79,16 +80,26 @@ $scanner = new LogicHook();
 $scanner->scanHooksDir($examples . '/custom/Extension/modules/SchedulersJobs/Ext/LogicHooks');
 $hook = $scanner->getHooksList()['job_failure'][0];
 require $examples . '/custom/modules/SchedulersJobs/LogicHooks/SchedulersJobsLogicHooks.php';
-$GLOBALS['log'] = new class () {
-    public array $warnings = [];
+$logSink = new class () {
+    public array $messages = [];
 
-    public function warning(string $message): void
+    public function log($level, $messages): void
     {
-        $this->warnings[] = $message;
+        $this->messages[] = [$level, $messages];
     }
 };
+$loggers = new ReflectionProperty(LoggerManager::class, '_loggers');
+$previousLoggers = $loggers->getValue();
+$loggers->setValue(null, ['SugarLogger' => $logSink]);
+// Skip configuration and file setup, but use Sugar's real level dispatch.
+$GLOBALS['log'] = (new ReflectionClass(LoggerManager::class))->newInstanceWithoutConstructor();
+$GLOBALS['log']->setLevel('debug');
 $handler = new ($hook[3])();
-$handler->{$hook[4]}((object) ['id' => 'synthetic-test', 'name' => 'Guide Test'], 'job_failure', []);
-verifySource($GLOBALS['log']->warnings === ['Scheduler job "Guide Test" reached its final failure.'], 'Sugar hook scanner resolves the example logging method');
+try {
+    $handler->{$hook[4]}((object) ['id' => 'synthetic-test', 'name' => 'Guide Test'], 'job_failure', []);
+} finally {
+    $loggers->setValue(null, $previousLoggers);
+}
+verifySource($logSink->messages === [['warn', ['Scheduler job "Guide Test" reached its final failure.']]], 'Sugar hook scanner resolves the method and the real logger dispatches warn');
 
 echo "Source checks only: database installation, repair, job-worker execution, and browser testing remain separate.\n";

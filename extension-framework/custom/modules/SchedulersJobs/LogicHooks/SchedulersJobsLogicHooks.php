@@ -13,7 +13,7 @@ class SchedulersJobsLogicHooks
     {
         $jobName = $bean->name ?? $bean->id;
 
-        $GLOBALS['log']->warning(
+        $GLOBALS['log']->warn(
             sprintf('Scheduler job "%s" reached its final failure.', $jobName)
         );
     }
